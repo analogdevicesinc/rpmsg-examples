@@ -39,6 +39,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>rpmsg-lite</name>
+			<type>2</type>
+			<locationURI>PARENT-1-PROJECT_LOC/rpmsg-lite</locationURI>
+		</link>
+		<link>
 			<name>system/services/tru/adi_tru.c</name>
 			<type>1</type>
 			<locationURI>CCES/SHARC/lib/src/services/Source/tru/adi_tru.c</locationURI>
