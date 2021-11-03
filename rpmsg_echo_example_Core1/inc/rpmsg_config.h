@@ -1,0 +1,6 @@
+#ifndef INCLUDE_RPMSG_CONFIG_H_
+#define INCLUDE_RPMSG_CONFIG_H_
+
+#define RL_USE_STATIC_API (1)
+
+#endif /* INCLUDE_RPMSG_CONFIG_H_ */
