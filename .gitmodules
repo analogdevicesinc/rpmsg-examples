@@ -1,0 +1,4 @@
+[submodule "rpmsg-lite"]
+	path = rpmsg-lite
+	url = git@src.timesys.com:services/analog-devices/sharc-alsa-audio-project/rpmsg-lite.git
+	branch = feature/add_sc5xx_sharc_platform
