@@ -18,6 +18,10 @@
  */
 char __argv_string[] = "";
 
+/*
+ * Expected resource table layout in the shared memory.
+ * Initialized by ARM.
+ */
 struct sharc_resource_table{
 	struct resource_table table_hdr;
 	unsigned int offset[1];
@@ -25,15 +29,30 @@ struct sharc_resource_table{
 	struct fw_rsc_vdev_vring vring[2];
 };
 
+/*
+ * Delcare two tables, one for each core.
+ * The ___MCAPI_arm_start address is defined in app.ldf
+ */
 extern "asm" struct sharc_resource_table ___MCAPI_arm_start[2];
 
-/* Static variables for rpmsg */
+/*
+ * Rpmsg endpoints addresses.
+ * Each end point on a rpmsg channel should have unique address
+ */
 #define ECHO_EP_ADDRESS 150
 #define ECHO_CAP_EP_ADDRESS 160
+
+/* Static variables for rpmsg-lite */
 struct rpmsg_lite_instance rpmsg_ARM_channel;
 struct rpmsg_lite_ept_static_context sharc_ARM_echo_endpoint_context;
 struct rpmsg_lite_ept_static_context sharc_ARM_echo_cap_endpoint_context;
 
+/*
+ * Declare endpoint info struct to keep endpoint pointer
+ * and its rpmsg-lite istance (channel).
+ * This is useful to pass as private pointer in rpmsg callback.
+ * The private pointer can be used to pass other data to callback function.
+ */
 struct rpmsg_ep_info{
 	struct rpmsg_lite_instance *rpmsg_instance;
 	struct rpmsg_lite_endpoint *rpmsg_ept;
@@ -49,8 +68,10 @@ const struct rpmsg_ep_info rpmsg_echo_cap_ep_to_ARM = {
 		.rpmsg_ept = &sharc_ARM_echo_cap_endpoint_context.ept,
 };
 
-// Local rpmsg queue to offload message handling in main loop instead in interrupt.
-// The queue uses rpmsg-lite zero copy functions.
+/*
+ * Local rpmsg queue to offload message handling in main loop instead in interrupt.
+ * The queue uses rpmsg-lite zero copy feature.
+ */
 #define MAX_RPMSG_COUNT 16
 typedef uint16_t sm_atomic_t;
 struct _rpmsg_msg{
@@ -63,6 +84,9 @@ volatile struct _rpmsg_msg rpmsg_msg_queue[MAX_RPMSG_COUNT];
 volatile sm_atomic_t rpmsg_msg_queue_head = 0;
 volatile sm_atomic_t rpmsg_msg_queue_tail = 0;
 
+/*
+ * Helper struct which represents memory ranges used by a vring.
+ */
 struct vring_mem_info{
 	uint64_t desc_start;
 	uint64_t desc_end;
@@ -70,6 +94,9 @@ struct vring_mem_info{
 	uint64_t buffer_end;
 };
 
+/*
+ * Helper function which reads memory ranges used by a vring.
+ */
 void vring_get_mem_alloc_info(struct fw_rsc_vdev_vring *vring, struct vring_mem_info *info){
 	struct vring_desc *desc = (struct vring_desc *)vring->da;
 	info->desc_start = (uint64_t)desc;
@@ -78,6 +105,9 @@ void vring_get_mem_alloc_info(struct fw_rsc_vdev_vring *vring, struct vring_mem_
 	info->buffer_end = desc->addr + vring->num * (RL_BUFFER_PAYLOAD_SIZE +16);
 }
 
+/*
+ * Initialize rpmsg channel to ARM core
+ */
 int rpmsg_init_channel_to_ARM(void){
 	struct sharc_resource_table *resource_table;
 	struct rpmsg_lite_instance *rpmsg_instance;
@@ -133,10 +163,17 @@ int rpmsg_init_channel_to_ARM(void){
 		return -1;
 	}
 
+	/*
+	 * Wait until ARM notifies the channel is up.
+	 */
 	while(!rpmsg_lite_is_link_up(rpmsg_instance));
 	return 0;
 }
 
+/*
+ * Rpmsg callback function wich can be assigned to multiple endpoints.
+ * It executes in interrupt context.
+ */
 int32_t echo_call_back(void *payload, uint32_t payload_len, uint32_t src, void *priv){
 	struct rpmsg_ep_info *_rpmsg_ep_info = (struct rpmsg_ep_info *)priv;
 	char* data=payload;
@@ -147,9 +184,11 @@ int32_t echo_call_back(void *payload, uint32_t payload_len, uint32_t src, void *
 	if (payload_len < RL_BUFFER_PAYLOAD_SIZE)
 		data[payload_len] = '\0';
 
+	// Attach sharc core info to the response
 	snprintf(append_msg, sizeof(append_msg), " => echo from Core%d\n", adi_core_id());
 	strcat_s(payload, RL_BUFFER_PAYLOAD_SIZE, append_msg);
 
+	// Send the message back to its origin endpoint
 	ret = rpmsg_lite_send(
 		_rpmsg_ep_info->rpmsg_instance,
 		_rpmsg_ep_info->rpmsg_ept,
@@ -163,6 +202,15 @@ int32_t echo_call_back(void *payload, uint32_t payload_len, uint32_t src, void *
 	return RL_SUCCESS;
 }
 
+/*
+ * Rpmsg callbacks execute in interrupt context.
+ * This rpmsg callback function returns RL_HOLD to tell rpmsg-lite
+ * to hold message buffer for later processing, zero-copy feature.
+ * The message can be put into queue for processing in idle loop instead of interrupt.
+ *
+ * After the message is processed in needs to be returned to the pool using:
+ * rpmsg_lite_release_rx_buffer()
+ */
 int32_t echo_cap_call_back(void *payload, uint32_t payload_len, uint32_t src, void *priv){
 	sm_atomic_t head_next = rpmsg_msg_queue_head + 1;
 	if (head_next >= MAX_RPMSG_COUNT){
@@ -185,6 +233,10 @@ int32_t echo_cap_call_back(void *payload, uint32_t payload_len, uint32_t src, vo
 	return RL_HOLD;
 }
 
+/*
+ * This function is called from the idle loop, processes message received in echo_cap_call_back.
+ * After message is processed the message buffer is released using rpmsg_lite_release_rx_buffer().
+ */
 int handle_echo_cap_messages(void){
 	struct rpmsg_ep_info *_rpmsg_ep_info;
 	sm_atomic_t tail_next;
@@ -194,10 +246,12 @@ int handle_echo_cap_messages(void){
 	char append_msg[64];
 	int32_t ret, i;
 
+	//queue empty do nothing
 	if(rpmsg_msg_queue_tail == rpmsg_msg_queue_head){
 		return 0;
 	}
 
+	//Get a message from the queue
 	tail_next = rpmsg_msg_queue_tail + 1;
 	if(tail_next >= MAX_RPMSG_COUNT){
 		tail_next = 0;
@@ -207,7 +261,7 @@ int handle_echo_cap_messages(void){
 	src = rpmsg_msg_queue[tail_next].src;
 	_rpmsg_ep_info = rpmsg_msg_queue[tail_next].priv;
 
-	// Capitalize letters
+	// Process the message - capitalize letters
 	for(i = 0; i < payload_len; i++){
 		if('a' <= payload[i] && payload[i] <= 'z'){
 			payload[i] = payload[i] - ('a' - 'A');
@@ -218,9 +272,11 @@ int handle_echo_cap_messages(void){
 	if (payload_len < RL_BUFFER_PAYLOAD_SIZE)
 		payload[payload_len] = '\0';
 
+	// Attach sharc core info to the response
 	snprintf(append_msg, sizeof(append_msg), " => capitalized echo from Core%d\n", adi_core_id());
 	strcat_s(payload, RL_BUFFER_PAYLOAD_SIZE, append_msg);
 
+	// Send modified message back to its origin endpoint
 	ret = rpmsg_lite_send(
 		_rpmsg_ep_info->rpmsg_instance,
 		_rpmsg_ep_info->rpmsg_ept,
@@ -238,6 +294,10 @@ int handle_echo_cap_messages(void){
 	return 1;
 }
 
+/*
+ * Create first endpoint on the rpmsg channel and announce its existence.
+ * Core id is added to ECHO_EP_ADDRESS so the address is different for each core.
+ */
 int rpmsg_init_echo_endpoint_to_ARM(void){
 	struct rpmsg_lite_endpoint *rpmsg_ept;
 	int ret;
@@ -263,6 +323,11 @@ int rpmsg_init_echo_endpoint_to_ARM(void){
 	return 0;
 }
 
+/*
+ * Create seccond endpoint on the rpmsg channel and announce its existence.
+ * Callback for this endpoint capitalizes letters in idle loop.
+ * Core id is added to ECHO_EP_ADDRESS so the address is different for each core.
+ */
 int rpmsg_init_echo_cap_endpoint_to_ARM(void){
 	struct rpmsg_lite_endpoint *rpmsg_ept;
 	int ret;
@@ -292,16 +357,20 @@ int main(int argc, char *argv[])
 {
 	int run=1;
 
+	// Initializes modules/components imported to the project
 	adi_initComponents();
+
+	// Initialize rpmsg channel to the ARM core and create two endpoints
 	rpmsg_init_channel_to_ARM();
 	rpmsg_init_echo_endpoint_to_ARM();
 	rpmsg_init_echo_cap_endpoint_to_ARM();
 
+	// Handle messages from echo_cap_call_back in the idle loop
 	while(run){
 		handle_echo_cap_messages();
 	}
 
-
+	// Close notify system we are about to close endpoints.
 	rpmsg_ns_announce(
 			rpmsg_echo_ep_to_ARM.rpmsg_instance,
 			rpmsg_echo_ep_to_ARM.rpmsg_ept,
@@ -314,6 +383,7 @@ int main(int argc, char *argv[])
 			"sharc-echo-cap",
 			RL_NS_DESTROY);
 
+	// Close endpoints and the rpmsg channel
 	rpmsg_lite_destroy_ept(rpmsg_echo_ep_to_ARM.rpmsg_instance, rpmsg_echo_ep_to_ARM.rpmsg_ept);
 	rpmsg_lite_destroy_ept(rpmsg_echo_cap_ep_to_ARM.rpmsg_instance, rpmsg_echo_cap_ep_to_ARM.rpmsg_ept);
 	rpmsg_lite_deinit(&rpmsg_ARM_channel);
