@@ -189,7 +189,7 @@
 								<option id="archiver.option.proc.1643278931" name="-proc" superClass="archiver.option.proc" value=" ADSP-SC594" valueType="string"/>
 								<option id="archiver.option.sirevision.1339518646" name="-si-revision" superClass="archiver.option.sirevision" value=" any" valueType="string"/>
 							</tool>
-							<tool id="sharc.toolchain.loader.160926246" name="CrossCore SHARC Loader" superClass="sharc.toolchain.loader">
+							<tool commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} " id="sharc.toolchain.loader.160926246" name="CrossCore SHARC Loader" superClass="sharc.toolchain.loader">
 								<option id="loader.option.proc.1204329970" name="-proc" superClass="loader.option.proc" value=" ADSP-SC594" valueType="string"/>
 								<option id="loader.option.sirevision.791781753" name="-si-revision" superClass="loader.option.sirevision" value=" any" valueType="string"/>
 								<option id="sharc.loader.option.kernelfile.1512594238" name="Kernel file (-l)" superClass="sharc.loader.option.kernelfile" value="C:\Analog Devices\CrossCore Embedded Studio 2.10.0\SHARC\ldr\_spi.dxe" valueType="string"/>
@@ -200,7 +200,7 @@
 									<listOptionValue builtIn="false" value="-MaxBlockSize 2048"/>
 								</option>
 								<option id="sharc.loader.option.executable.set2.1524921717" name="Executable" superClass="sharc.loader.option.executable.set2" value="${OutDir}/${ProjName}.dxe" valueType="string"/>
-								<option id="sharc.loader.option.executable.set3.515298376" name="Executable" superClass="sharc.loader.option.executable.set3" value="${OutDir}/${ProjName}.dxe" valueType="string"/>
+								<option id="sharc.loader.option.executable.set3.515298376" name="Executable" superClass="sharc.loader.option.executable.set3" value="" valueType="string"/>
 							</tool>
 							<tool id="sharc.toolchain.deviceprogrammer.911613203" name="CrossCore SHARC Device Programmer" superClass="sharc.toolchain.deviceprogrammer">
 								<option id="deviceprogrammer.option.proc.650340558" name="-proc" superClass="deviceprogrammer.option.proc" value=" ADSP-SC594" valueType="string"/>
@@ -250,4 +250,5 @@
 		</project-mappings>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+	<storageModule moduleId="refreshScope"/>
 </cproject>
