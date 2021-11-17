@@ -87,22 +87,24 @@ volatile sm_atomic_t rpmsg_msg_queue_tail = 0;
 /*
  * Helper struct which represents memory ranges used by a vring.
  */
-struct vring_mem_info{
-	uint64_t desc_start;
-	uint64_t desc_end;
-	uint64_t buffer_start;
-	uint64_t buffer_end;
+struct _mem_range{
+	uint32_t start;
+	uint32_t end;
 };
 
 /*
  * Helper function which reads memory ranges used by a vring.
  */
-void vring_get_mem_alloc_info(struct fw_rsc_vdev_vring *vring, struct vring_mem_info *info){
+void vring_get_descriptor_range(struct fw_rsc_vdev_vring *vring, struct _mem_range *range){
 	struct vring_desc *desc = (struct vring_desc *)vring->da;
-	info->desc_start = (uint64_t)desc;
-	info->desc_end = (uint64_t)desc + vring_size(vring->num, vring->align);
-	info->buffer_start = desc->addr;
-	info->buffer_end = desc->addr + vring->num * (RL_BUFFER_PAYLOAD_SIZE +16);
+	range->start = (uint32_t)desc;
+	range->end = (uint32_t)desc + vring_size(vring->num, vring->align);
+}
+void vring_get_buffer_range(struct fw_rsc_vdev_vring *vring, struct _mem_range *range){
+	struct vring_desc *desc = (struct vring_desc *)vring->da;
+	uint32_t num = 2 * vring->num; // vring0 descriptor has pointer to buffers for both vrings
+	range->start = (uint32_t)desc->addr;
+	range->end = (uint32_t)desc->addr + num * (RL_BUFFER_PAYLOAD_SIZE +16);
 }
 
 /*
@@ -112,47 +114,51 @@ int rpmsg_init_channel_to_ARM(void){
 	struct sharc_resource_table *resource_table;
 	struct rpmsg_lite_instance *rpmsg_instance;
 	adiCacheStatus status;
-	uint32_t addr_start, addr_end;
-	struct vring_mem_info vring0_info;
-	struct vring_mem_info vring1_info;
+	struct _mem_range range0;
+	struct _mem_range range1;
 
-	// The delay is required to read addresses correctly
-	platform_time_delay(15);
+	// The delay is required after cache is disabled
+	platform_time_delay(200);
 
-    switch(adi_core_id()){
+	switch(adi_core_id()){
 	case ADI_CORE_ARM:
 		return -1;
 		//break;
-    case ADI_CORE_SHARC0:
+	case ADI_CORE_SHARC0:
 		resource_table = &___MCAPI_arm_start[0];
 		break;
-    case ADI_CORE_SHARC1:
+	case ADI_CORE_SHARC1:
 		resource_table = &___MCAPI_arm_start[1];
 		break;
-    default:
+	default:
 		// should never happen
 		break;
-    }
+	}
 
-    // Get memory range which needs cache disabled
-    // Read vring memory info
-	vring_get_mem_alloc_info(&resource_table->vring[0], &vring0_info);
-	vring_get_mem_alloc_info(&resource_table->vring[1], &vring1_info);
+	// Get memory range which needs disabled cache
+	// Read vring descriptors memory range
+	vring_get_descriptor_range(&resource_table->vring[0], &range0);
+	vring_get_descriptor_range(&resource_table->vring[1], &range1);
+	range0.start = min(range0.start, range1.start);
+	range0.end = max(range0.end, range1.end);
+	// Disable cache for the descriptors memory range
+	status = adi_cache_set_range ((void *)range0.start,
+						 (void *)(range0.end),
+						 adi_cache_rr6,
+						 adi_cache_noncacheable_range);
+	// The delay is required after cache is disabled
+	platform_time_delay(200);
 
-#define _min_u64_to_u32(a, b) ((uint32_t)((a)<(b)?(a):(b)))
-#define _max_u64_to_u32(a, b) ((uint32_t)((a)>(b)?(a):(b)))
+	// Read vring buffer memory range
 	// vring1 has its own descriptors but share buffers with vring0
-	// vring1.buffer_start and vring1_info.buffer_end has invalid addresses, ignore them
-    addr_start = _min_u64_to_u32(vring0_info.desc_start, vring1_info.desc_start);
-    addr_start = _min_u64_to_u32(addr_start, vring0_info.buffer_start);
-    addr_end = _max_u64_to_u32(vring0_info.desc_end, vring1_info.desc_end);
-    addr_end = _max_u64_to_u32(addr_end, vring0_info.buffer_end);
-
-    // Disable cache for the vring memory range
-	status = adi_cache_set_range ((void *)addr_start,
-                         (void *)(addr_end),
+	vring_get_buffer_range(&resource_table->vring[0], &range1);
+	// Disable cache for the vring buffer range
+	status = adi_cache_set_range ((void *)range1.start,
+						 (void *)(range1.end),
 						 adi_cache_rr7,
-                         adi_cache_noncacheable_range);
+						 adi_cache_noncacheable_range);
+	// The delay is required after cache is disabled
+	platform_time_delay(200);
 
 	rpmsg_instance = rpmsg_lite_remote_init(
 			&resource_table->rpmsg_vdev,
@@ -296,6 +302,7 @@ int handle_echo_cap_messages(void){
 
 /*
  * Create first endpoint on the rpmsg channel and announce its existence.
+ * Core id is added to ECHO_EP_ADDRESS so the address is different for each core.
  */
 int rpmsg_init_echo_endpoint_to_ARM(void){
 	struct rpmsg_lite_endpoint *rpmsg_ept;
@@ -325,6 +332,7 @@ int rpmsg_init_echo_endpoint_to_ARM(void){
 /*
  * Create seccond endpoint on the rpmsg channel and announce its existence.
  * Callback for this endpoint capitalizes letters in idle loop.
+ * Core id is added to ECHO_EP_ADDRESS so the address is different for each core.
  */
 int rpmsg_init_echo_cap_endpoint_to_ARM(void){
 	struct rpmsg_lite_endpoint *rpmsg_ept;
