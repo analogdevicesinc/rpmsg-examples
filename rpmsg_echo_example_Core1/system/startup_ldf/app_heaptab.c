@@ -1,5 +1,5 @@
 /*
-** ADSP-SC594 user heap source file generated on Nov 03, 2021 at 11:57:03.
+** ADSP-SC598 user heap source file generated on Nov 22, 2021 at 16:06:24.
 */
 /*
 ** Copyright (C) 2000-2021 Analog Devices Inc., All Rights Reserved.
@@ -15,7 +15,7 @@
 ** placed within these sections are preserved when this file is re-generated.
 **
 ** Product      : CrossCore Embedded Studio
-** Tool Version : 6.2.2.7
+** Tool Version : 6.2.3.0
 */
 
 #ifdef _MISRA_RULES

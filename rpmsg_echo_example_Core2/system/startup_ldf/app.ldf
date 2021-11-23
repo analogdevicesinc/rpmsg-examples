@@ -1,5 +1,5 @@
 /*
-** ADSP-SC594 core 2 linker description file generated on Nov 03, 2021 at 11:57:16.
+** ADSP-SC598 core 2 linker description file generated on Nov 22, 2021 at 16:06:49.
 */
 /*
 ** Copyright (C) 2000-2021 Analog Devices Inc., All Rights Reserved.
@@ -15,10 +15,10 @@
 ** placed within these sections are preserved when this file is re-generated.
 **
 ** Product      : CrossCore Embedded Studio
-** Tool Version : 6.2.2.7
+** Tool Version : 6.2.3.0
 */
 
-ARCHITECTURE(ADSP-SC594)
+ARCHITECTURE(ADSP-SC598)
 
 /*
 ** Define a linked library list. Libraries from the command line are included
@@ -114,9 +114,8 @@ $OBJS_LIBS_NOT_EXTERNAL =
 
 MEMORY
 {
-   // ADSP-SC594 MEMORY MAP.
-   // The ADSP-SC59x and ADSP-2159x SHARC+ cores have 5 Mbit L1 RAM split over
-   // four blocks.
+   // ADSP-SC598 MEMORY MAP.
+   // The ADSP-SC598 SHARC+ core has 5 Mbit L1 RAM split over four blocks.
 
    // This LDF defines memory sections only in byte format. It is no longer
    // necessary to partition memory for different widths and different
@@ -204,7 +203,7 @@ MEMORY
    
 } /* MEMORY */
 
-PROCESSOR SC594_CORE_2
+PROCESSOR SC598_CORE_2
 {
    LINK_AGAINST( $COMMAND_LINE_LINK_AGAINST )
    OUTPUT($COMMAND_LINE_OUTPUT_FILE)
@@ -1290,7 +1289,6 @@ PROCESSOR SC594_CORE_2
       ___l2_uncached_end    = MEMORY_END  (mem_L2B1P5_bw);
       ___l2_cached_start    = MEMORY_START(mem_L2B2toB4_bw);
       ___l2_cached_end      = MEMORY_END  (mem_L2BC_bw);
-
       #if defined(MY_L2_UNCACHED_MEM)
       dxe_l2_uncached_bw DATA_INIT_QUAL BW
       {
@@ -1346,5 +1344,5 @@ PROCESSOR SC594_CORE_2
       /*$VDSG<insert-new-sections-at-the-end>                   */
       
    } /* SECTIONS */
-} /* SC594_CORE_2 */
+} /* SC598_CORE_2 */
 

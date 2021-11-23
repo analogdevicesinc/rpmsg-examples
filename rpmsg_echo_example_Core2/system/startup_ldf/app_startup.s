@@ -1,5 +1,5 @@
 /*
-** ADSP-SC594 startup code generated on Nov 03, 2021 at 11:57:15.
+** ADSP-SC598 startup code generated on Nov 22, 2021 at 16:06:49.
 */
 /*
 ** Copyright (C) 2000-2021 Analog Devices Inc., All Rights Reserved.
@@ -15,7 +15,7 @@
 ** placed within these sections are preserved when this file is re-generated.
 **
 ** Product      : CrossCore Embedded Studio
-** Tool Version : 6.2.2.7
+** Tool Version : 6.2.3.0
 */
 
 .FILE_ATTR libGroup="startup";
