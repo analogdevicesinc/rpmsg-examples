@@ -34,7 +34,7 @@ To communicate to the endpoints from userspace kernel must be compiled with `CON
 SHARC Core1 initialization script for the echo example:
 ```shell
 #!/bin/sh
-echo rpmsg_echo_example_Core1.ldr > /sys/class/remoteproc/remoteproc0/firmware
+echo echo_core1.ldr > /sys/class/remoteproc/remoteproc0/firmware
 echo start > /sys/class/remoteproc/remoteproc0/state
 
 RPMSG_EP=$(basename $(ls -d /sys/bus/rpmsg/devices/*.sharc-echo.-1.151))
@@ -47,7 +47,7 @@ RPMSG_EP=$(basename $(ls -d /sys/bus/rpmsg/devices/*.sharc-echo-cap.-1.161))
 SHARC Core2 initialization script for the echo example:
 ```shell
 #!/bin/sh
-echo rpmsg_echo_example_Core2.ldr > /sys/class/remoteproc/remoteproc1/firmware
+echo echo_core2.ldr > /sys/class/remoteproc/remoteproc1/firmware
 echo start > /sys/class/remoteproc/remoteproc1/state
 
 RPMSG_EP=$(basename $(ls -d /sys/bus/rpmsg/devices/*.sharc-echo.-1.152))
