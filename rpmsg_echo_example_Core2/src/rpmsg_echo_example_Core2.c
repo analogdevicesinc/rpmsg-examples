@@ -74,8 +74,8 @@ const struct adi_resource_table rsc_tbl_local = {
  * The ___MCAPI_common_start address is defined in app.ldf
  */
 extern "asm" struct adi_resource_table ___MCAPI_common_start;
-static struct adi_resource_table *adi_resource_table;
-static struct sharc_resource_table *resource_table;
+volatile struct adi_resource_table *adi_resource_table;
+volatile struct sharc_resource_table *resource_table;
 
 /*
  * Rpmsg endpoints addresses.
@@ -137,12 +137,12 @@ struct _mem_range{
 /*
  * Helper function which reads memory ranges used by a vring.
  */
-void vring_get_descriptor_range(struct fw_rsc_vdev_vring *vring, struct _mem_range *range){
+void vring_get_descriptor_range(volatile struct fw_rsc_vdev_vring *vring, struct _mem_range *range){
 	struct vring_desc *desc = (struct vring_desc *)vring->da;
 	range->start = (uint32_t)desc;
 	range->end = (uint32_t)desc + vring_size(vring->num, vring->align);
 }
-void vring_get_buffer_range(struct fw_rsc_vdev_vring *vring, struct _mem_range *range){
+void vring_get_buffer_range(volatile struct fw_rsc_vdev_vring *vring, struct _mem_range *range){
 	struct vring_desc *desc = (struct vring_desc *)vring->da;
 	uint32_t num = 2 * vring->num; // vring0 descriptor has pointer to buffers for both vrings
 	range->start = (uint32_t)desc->addr;
@@ -150,8 +150,6 @@ void vring_get_buffer_range(struct fw_rsc_vdev_vring *vring, struct _mem_range *
 }
 
 void init_rsc_tbl(void) {
-	// The delay is required after cache is disabled
-	platform_time_delay(200);
 
 	switch(adi_core_id()){
 	case ADI_CORE_ARM:
@@ -225,8 +223,6 @@ int rpmsg_init_channel_to_ARM(void){
 						(void *)(range0.end),
 						adi_cache_rr6,
 						adi_cache_noncacheable_range);
-	// The delay is required after cache is disabled
-	platform_time_delay(200);
 
 	// Read vring buffer memory range
 	// vring1 has its own descriptors but share buffers with vring0
@@ -236,11 +232,9 @@ int rpmsg_init_channel_to_ARM(void){
 						(void *)(range1.end),
 						adi_cache_rr7,
 						adi_cache_noncacheable_range);
-	// The delay is required after cache is disabled
-	platform_time_delay(200);
 
 	rpmsg_instance = rpmsg_lite_remote_init(
-			&resource_table->rpmsg_vdev,
+			(void*)&resource_table->rpmsg_vdev,
 			RL_PLATFORM_SHARC_ARM_LINK_ID,
 			RL_SHM_VDEV,
 			&rpmsg_ARM_channel);
