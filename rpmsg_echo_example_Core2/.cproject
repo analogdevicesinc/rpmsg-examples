@@ -47,6 +47,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/system}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/rpmsg-lite/lib/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/rpmsg-lite/lib/include/environment/bm}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/rpmsg-lite/lib/include/platform/adsp-sc5xx-sharc}&quot;"/>
 								</option>
 								<option id="compiler.option.compilerswitch.604501334" name="Compiler Switch" superClass="compiler.option.compilerswitch" useByScannerDiscovery="false" value="false" valueType="boolean"/>
@@ -162,6 +163,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/system}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/rpmsg-lite/lib/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/rpmsg-lite/lib/include/environment/bm}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/rpmsg-lite/lib/include/platform/adsp-sc5xx-sharc}&quot;"/>
 								</option>
 								<option id="compiler.option.compilerswitch.1842167447" name="Compiler Switch" superClass="compiler.option.compilerswitch" useByScannerDiscovery="false" value="false" valueType="boolean"/>
