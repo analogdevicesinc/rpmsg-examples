@@ -1,3 +1,8 @@
+/* SPDX-License-Identifier: BSD-4-Clause
+ *
+ * Copyright 2023, Analog Devices, Inc. All rights reserved. 
+*/
+
 /*****************************************************************************
  * rpmsg_echo_example_Core1.h
  *****************************************************************************/
