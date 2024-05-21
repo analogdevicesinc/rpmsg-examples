@@ -10,6 +10,8 @@
 #include <rpmsg_lite.h>
 #include <rpmsg_ns.h>
 
+#include <services/int/adi_sec.h>
+
 #include "adi_initialize.h"
 #include "rpmsg_echo_example_Core2.h"
 
@@ -441,13 +443,47 @@ int rpmsg_init_echo_cap_endpoint_to_ARM(int channel){
 	return 0;
 }
 
+#define ADI_SEC_SSI_STRIDE          1u
+/*
+ * Check if watchdog was enabled. This to fix issues on Linux side, when
+ * watchdog is enabled from a driver and SHARC Core's reset it when firmware is loaded
+ */
+bool adi_sec_Watchdog0_Enabled() {
+
+	volatile uint32_t *pSCTL;
+	uint32_t secSCTL;
+
+	/* SID used as offset to point at correct SCTL for WDOG0 */
+	pSCTL = pREG_SEC0_SCTL0 + (INTR_WDOG0_EXP << ADI_SEC_SSI_STRIDE);
+
+	/* Get the contents of source control register */
+	secSCTL = *pSCTL;
+
+	if ((secSCTL & (BITM_SEC_FCTL_SREN|BITM_SEC_SCTL_FEN)) == (BITM_SEC_FCTL_SREN|BITM_SEC_SCTL_FEN)) {
+		return true;
+	}
+
+	return false;
+}
+
 int main(int argc, char *argv[])
 {
 	int run=1;
 	int i=0;
+	bool wdt_set=false;
+
+	wdt_set = adi_sec_Watchdog0_Enabled();
 
 	// Initializes modules/components imported to the project
 	adi_initComponents();
+
+	//the SHARC Core2 reset SEC without checking if anything was set
+	if (wdt_set) {
+		adi_sec_EnableSystemReset(true);
+		adi_sec_EnableSource(INTR_WDOG0_EXP, 1);
+		adi_sec_EnableFault(INTR_WDOG0_EXP, 1);
+		adi_sec_EnableSFI(true);
+	}
 
 	//Initialise endpoints
 	for (i=0;i<EP_NUM_PER_CHAN;i++)  {
