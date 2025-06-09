@@ -1,4 +1,9 @@
-[submodule "rpmsg-lite"]
-	path = rpmsg-lite
+[submodule "echo_example/rpmsg-lite"]
+	path = echo_example/rpmsg-lite
+	url = https://github.com/analogdevicesinc/rpmsg-lite.git
+	branch = master
+
+[submodule "fir_example/rpmsg-lite"]
+	path = fir_example/rpmsg-lite
 	url = https://github.com/analogdevicesinc/rpmsg-lite.git
 	branch = master
