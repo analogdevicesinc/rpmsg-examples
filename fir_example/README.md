@@ -50,8 +50,11 @@ import matplotlib.pyplot as plt
 df = pd.read_csv("input.dat")
 df.plot()
 ```
+![Untitled](https://github.com/user-attachments/assets/9bc30bb9-14d9-4d82-bea5-528bbe749948)
+
 
 ```
 df = pd.read_csv("output.dat")
 df.plot()
 ```
+![Untitled-1](https://github.com/user-attachments/assets/490f5abc-c109-40dc-9cdf-e7f16bcd892c)
