@@ -1,0 +1,122 @@
+name: Build
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: analogdevicesinc/doctools/cloudsmith-auth@action
+        with:
+          namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
+          service-slug: ${{ secrets.CLOUDSMITH_SERVICE_SLUG }}
+          api-key: ${{ secrets.CLOUDSMITH_API_KEY }}
+
+      - name: Install SHARC SDK
+        run: |
+          curl -1sLf \
+            -H "Authorization: Bearer $CLOUDSMITH_API_KEY" \
+            -o adi-cces-linux-amd64-3.0.3.deb \
+            "https://dl.cloudsmith.io/basic/adi/restricted/deb/ubuntu/pool/any-version/main/a/ad/adi-cces-3.0.3_3.0.3/adi-cces-linux-amd64-3.0.3.deb"
+
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y \
+            libncursesw6 libc6:i386 libstdc++6:i386
+          sudo ln -sf /lib/x86_64-linux-gnu/libncursesw.so.6 \
+                      /lib/x86_64-linux-gnu/libncursesw.so.5
+          sudo ldconfig
+
+          echo "adi-cces-3.0.3 adi-cces-3.0.3/accept-sla boolean true" \
+            | sudo debconf-set-selections
+          sudo dpkg --force-depends -i adi-cces-linux-amd64-3.0.3.deb
+
+      - name: Install sharcLinux toolchain
+        run: |
+          curl -1sLf \
+            -H "Authorization: Bearer $CLOUDSMITH_API_KEY" \
+            -o sharc-linux-support-files-cces-3.0.3-20250704.tar.xz \
+            "https://dl.cloudsmith.io/basic/${{ vars.CLOUDSMITH_NAMESPACE }}/restricted/raw/versions/3.0.3/sharc-linux-support-files-cces-3.0.3-20250704.tar.xz"
+
+          sudo tar -xJ --no-same-owner \
+            -f sharc-linux-support-files-cces-3.0.3-20250704.tar.xz \
+            -C /opt/analog/cces/3.0.3/
+
+      - name: Install license
+        env:
+          CCES_LICENSE_DAT: ${{ secrets.CCES_LICENSE_DAT }}
+        run: |
+          mkdir -p ~/.analog/cces
+          printf '%s' "$CCES_LICENSE_DAT" > ~/.analog/cces/license.dat
+
+      - name: Set hostname for FLEXlm license check
+        run: |
+          sudo hostname build.analog.com
+          hostname
+
+      - name: Build echo Core1
+        run: |
+          export PATH=/opt/analog/cces/3.0.3:/opt/analog/cces/3.0.3/Eclipse:$PATH
+          cd echo_example/rpmsg_echo_example_Core1
+          cces -nosplash \
+            -application com.analog.crosscore.headlesstools \
+            -data /tmp/cces-workspace \
+            -project . \
+            -cleanBuild all
+
+      - name: Build echo Core2
+        run: |
+          export PATH=/opt/analog/cces/3.0.3:/opt/analog/cces/3.0.3/Eclipse:$PATH
+          cd echo_example/rpmsg_echo_example_Core2
+          cces -nosplash \
+            -application com.analog.crosscore.headlesstools \
+            -data /tmp/cces-workspace \
+            -project . \
+            -cleanBuild all
+
+      - name: Build fir example
+        run: |
+          export PATH=/opt/analog/cces/3.0.3:/opt/analog/cces/3.0.3/Eclipse:$PATH
+          cd fir_example
+          cces -nosplash \
+            -application com.analog.crosscore.headlesstools \
+            -data /tmp/cces-workspace \
+            -project . \
+            -cleanBuild all
+
+      - name: Copy .dxe to .elf
+        run: |
+          cp echo_example/rpmsg_echo_example_Core1/Debug/rpmsg_echo_example_Core1.dxe \
+             echo_example/rpmsg_echo_example_Core1/Debug/rpmsg_echo_example_Core1.elf
+          cp echo_example/rpmsg_echo_example_Core2/Debug/rpmsg_echo_example_Core2.dxe \
+             echo_example/rpmsg_echo_example_Core2/Debug/rpmsg_echo_example_Core2.elf
+          cp fir_example/Debug/rpmsg_shared_mem_example.dxe \
+             fir_example/Debug/rpmsg_shared_mem_example.elf
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sharc-firmware
+          path: |
+            echo_example/rpmsg_echo_example_Core1/Debug/*.ldr
+            echo_example/rpmsg_echo_example_Core1/Debug/*.dxe
+            echo_example/rpmsg_echo_example_Core1/Debug/*.elf
+            echo_example/rpmsg_echo_example_Core2/Debug/*.ldr
+            echo_example/rpmsg_echo_example_Core2/Debug/*.dxe
+            echo_example/rpmsg_echo_example_Core2/Debug/*.elf
+            fir_example/Debug/*.ldr
+            fir_example/Debug/*.dxe
+            fir_example/Debug/*.elf
