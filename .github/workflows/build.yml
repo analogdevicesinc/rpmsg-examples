@@ -5,6 +5,8 @@ on:
     branches: ["main"]
   pull_request:
   workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
   build:
@@ -120,3 +122,25 @@ jobs:
             fir_example/Debug/*.ldr
             fir_example/Debug/*.dxe
             fir_example/Debug/*.elf
+
+      - name: Archive firmware for release
+        if: github.event_name == 'release'
+        run: |
+          tar -cJvf sharc-firmware-${{ github.event.release.tag_name }}.tar.xz \
+            echo_example/rpmsg_echo_example_Core1/Debug/*.ldr \
+            echo_example/rpmsg_echo_example_Core1/Debug/*.dxe \
+            echo_example/rpmsg_echo_example_Core1/Debug/*.elf \
+            echo_example/rpmsg_echo_example_Core2/Debug/*.ldr \
+            echo_example/rpmsg_echo_example_Core2/Debug/*.dxe \
+            echo_example/rpmsg_echo_example_Core2/Debug/*.elf \
+            fir_example/Debug/*.ldr \
+            fir_example/Debug/*.dxe \
+            fir_example/Debug/*.elf
+
+      - name: Upload firmware to release
+        uses: svenstaro/upload-release-action@v2
+        if: github.event_name == 'release'
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: sharc-firmware-${{ github.event.release.tag_name }}.tar.xz
+          tag: ${{ github.ref }}
