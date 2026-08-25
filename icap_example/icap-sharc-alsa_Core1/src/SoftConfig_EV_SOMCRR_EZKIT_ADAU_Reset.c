@@ -20,7 +20,7 @@
  *
  */
 
-#include <drivers\twi\adi_twi_2156x.h>
+#include <drivers/twi/adi_twi_2156x.h>
 
 /* TWI settings */
 #define TWI_PRESCALE (12u)
