@@ -40,12 +40,12 @@
 		<link>
 			<name>icap</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/icap</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/icap</locationURI>
 		</link>
 		<link>
 			<name>rpmsg-lite</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/rpmsg-lite</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/rpmsg-lite</locationURI>
 		</link>
 		<link>
 			<name>system/drivers/sport/adi_sport.c</name>
