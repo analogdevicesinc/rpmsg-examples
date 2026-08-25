@@ -66,9 +66,16 @@ int create_icap_sharc_alsa_record_endpoint(void)
 	struct rpmsg_lite_endpoint *rpmsg_ept;
 	int ret;
 
+	/*
+	 * The record endpoint uses a fixed address, unlike the playback
+	 * endpoint which adds adi_core_id() to support per-core addressing.
+	 * Capture is handled by a single endpoint on Core1 only; if this
+	 * example is ever extended to dual-core capture, restore the
+	 * adi_core_id() offset and update the Linux driver accordingly.
+	 */
 	rpmsg_ept = rpmsg_lite_create_ept(
 		&rpmsg_ARM_channel,
-		ICAP_SHARC_ALSA_RECORD_EP_ADDRESS, /* + adi_core_id(),*/
+		ICAP_SHARC_ALSA_RECORD_EP_ADDRESS,
 		&icap_call_back, (void *)&icap_sharc_alsa_record,
 		&icap_sharc_alsa_record_endpoint_context);
 	if (rpmsg_ept == RL_NULL) {
