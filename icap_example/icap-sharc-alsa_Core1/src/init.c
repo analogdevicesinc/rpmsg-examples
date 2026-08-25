@@ -131,7 +131,7 @@ void gpio_init_pins(GPIO_CONFIG *pinConfig, int numPins)
 	GPIO_CONFIG *pin;
 	int i;
 
-	for (i = 0; i < GPIO_PIN_MAX; i++) {
+	for (i = 0; i < numPins; i++) {
 		/* Select the pin */
 		pin = &pinConfig[i];
 
