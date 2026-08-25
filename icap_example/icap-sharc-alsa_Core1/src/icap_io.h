@@ -20,8 +20,8 @@ struct icap_device_buffer {
 	uint32_t frag_level;
 	uint32_t buf_id;
 	struct icap_instance *icap;
-	uint32_t in_use;
-	int32_t acks;
+	volatile uint32_t in_use; /* written by RPMsg callbacks, read in DMA ISR context */
+	volatile int32_t acks;   /* incremented in DMA ISR, decremented in RPMsg callback */
 };
 
 void update_frags(struct icap_device_buffer *buf, uint32_t frags);
