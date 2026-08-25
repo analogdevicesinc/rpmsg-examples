@@ -151,82 +151,92 @@ static void routeAudio(STREAM_INFO *streamInfo, unsigned numStreams,
 	unsigned channel;
 	SYSTEM_AUDIO_TYPE sample;
 
-	unsigned attenuationShift;
 	int32_t *ip_ptr;
 	int32_t *out_ptr;
 	unsigned channel_route;
+	unsigned r;
 
-	route = &routeInfo[0];
+	for (r = 0; r < numRoutes; r++) {
+		route = &routeInfo[r];
 
-	src = &streamInfo[route->srcID];
-	sink = &streamInfo[route->sinkID];
+		if (route->srcID == STREAM_ID_UNKNOWN ||
+		    route->sinkID == STREAM_ID_UNKNOWN)
+			continue;
 
-	if ((src->data == NULL) || (sink->data == NULL)) {
-		return;
-	}
+		src = &streamInfo[route->srcID];
+		sink = &streamInfo[route->sinkID];
 
-	inChannel = route->srcOffset;
-	outChannel = route->sinkOffset;
+		if ((src->data == NULL) || (sink->data == NULL))
+			continue;
 
-	channels = route->channels;
-	channel_route = route->channel_route;
-	in = (SYSTEM_AUDIO_TYPE *)src->data + inChannel;
-	int32_t *out32 = (int32_t *)sink->data + outChannel;
-	int16_t *out16 = (int16_t *)sink->data + outChannel;
+		inChannel = route->srcOffset;
+		outChannel = route->sinkOffset;
 
-	ip_ptr = (int32_t *)sink->data + outChannel;
-	out_ptr = (int32_t *)sink->data + outChannel;
+		channels = route->channels;
+		channel_route = route->channel_route;
+		in = (SYSTEM_AUDIO_TYPE *)src->data + inChannel;
+		int32_t *out32 = (int32_t *)sink->data + outChannel;
+		int16_t *out16 = (int16_t *)sink->data + outChannel;
 
-	for (frame = 0; frame < src->numFrames; frame++) {
-		for (channel = 0; channel < channels; channel++) {
-			if ((outChannel + channel) < sink->numChannels) {
-				if ((inChannel + channel) < src->numChannels) {
-					sample = *(in + channel);
-				} else {
-					sample = 0;
+		ip_ptr = (int32_t *)src->data + inChannel;
+		out_ptr = (int32_t *)sink->data + outChannel;
+
+		for (frame = 0; frame < src->numFrames; frame++) {
+			for (channel = 0; channel < channels; channel++) {
+				if ((outChannel + channel) < sink->numChannels) {
+					if ((inChannel + channel) <
+					    src->numChannels) {
+						sample = *(in + channel);
+					} else {
+						sample = 0;
+					}
+					if (sink->wordSize == sizeof(int32_t)) {
+						*(out32 + channel) = sample;
+					} else {
+						*(out16 + channel) =
+							sample >> 16;
+					}
 				}
-				if (sink->wordSize == sizeof(int32_t)) {
-					*(out32 + channel) = sample;
+			}
+			in += src->numChannels;
+			out32 += sink->numChannels;
+		}
 
-				} else {
-					*(out16 + channel) = sample >> 16;
+		/*
+		 * ROUTE_ENABLE: remap channels 4-16 from the source buffer
+		 * to DAC outputs 1-12; zero channels 13-16.
+		 */
+		if (channel_route == 1) {
+			for (int fr = 0; fr < (int)src->numFrames; fr++) {
+				for (int in_ch = 4, op_ch = 0;
+				     in_ch < (int)sink->numChannels;
+				     in_ch++, op_ch++) {
+					out_ptr[fr * sink->numChannels + op_ch] =
+						ip_ptr[fr * src->numChannels +
+						       in_ch];
+				}
+				for (int op_ch = 12;
+				     op_ch < (int)sink->numChannels; op_ch++) {
+					out_ptr[fr * sink->numChannels + op_ch] =
+						0;
 				}
 			}
 		}
-		in += src->numChannels;
-		out32 += sink->numChannels;
-	}
-
-	/* This routes data from channels 4�16 to DAC outputs 1�12.*/
-
-	if (channel_route == 1) {
-		for (int fr = 0; fr < src->numFrames; fr++) {
-			for (int in_ch = 4, op_ch = 0;
-			     in_ch < sink->numChannels; in_ch++, op_ch++) {
-				out_ptr[fr * sink->numChannels + op_ch] =
-					ip_ptr[fr * sink->numChannels + in_ch];
-			}
-
-			for (int op_ch = 12; op_ch < sink->numChannels;
-			     op_ch++) {
-				out_ptr[fr * sink->numChannels + op_ch] = 0;
-			}
-		}
-	}
 
 #ifdef ICAP_RECORD_EN
-
-	if (icap_sharc_alsa_playback_buffer.in_use == 1) {
-		for (int i = 0; i < SYSTEM_BLOCK_SIZE; i++) {
-			for (int j = 0; j < LINUX_AUDIO_OUT_CHANNELS; ++j) {
-				put_s32(&icap_sharc_alsa_record_buffer,
-					out_ptr[i * LINUX_AUDIO_OUT_CHANNELS +
-						j]);
+		if (route->sinkID == STREAM_ID_CODEC_OUT &&
+		    icap_sharc_alsa_playback_buffer.in_use == 1) {
+			for (int i = 0; i < SYSTEM_BLOCK_SIZE; i++) {
+				for (int j = 0; j < (int)sink->numChannels;
+				     ++j) {
+					put_s32(&icap_sharc_alsa_record_buffer,
+						out_ptr[i * sink->numChannels +
+							j]);
+				}
 			}
 		}
-	}
-
 #endif
+	} /* for each route */
 }
 
 static void inline setStreamInfo(STREAM_ID streamID, unsigned numChannels,
