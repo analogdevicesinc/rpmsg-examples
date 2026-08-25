@@ -34,10 +34,6 @@
 static STREAM_INFO STREAMS[STREAM_ID_MAX];
 
 #pragma section("seg_l2_dmda_bw")
-static SYSTEM_AUDIO_TYPE LINUX_OUT_BUFFER[2][LINUX_AUDIO_OUT_CHANNELS *
-					     SYSTEM_BLOCK_SIZE] = { 0 };
-
-#pragma section("seg_l2_dmda_bw")
 static SYSTEM_AUDIO_TYPE LINUX_IN_BUFFER[2][LINUX_AUDIO_IN_CHANNELS_MAX *
 					    SYSTEM_BLOCK_SIZE] = { 0 };
 
