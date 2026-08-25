@@ -9,10 +9,10 @@
  * software may not be used except as expressly authorized under the license.
  */
 
-#include "icap_playback_device.h"
-
 #ifndef __ICAP_IO_H__
 #define __ICAP_IO_H__
+
+#include "icap_playback_device.h"
 
 struct icap_device_buffer {
 	struct icap_buf_descriptor descr;
