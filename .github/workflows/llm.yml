@@ -1,0 +1,214 @@
+name: LLM Agent
+run-name: LLM run ${{ inputs.ref }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "The branch, tag, PR number, or SHA to checkout"
+        required: false
+        type: string
+      prompt:
+        description: "Prompt to use, overwrites the default"
+        required: false
+        type: string
+        default: ""
+      prompt-extra:
+        description: "Extra prompt to concatenate"
+        required: false
+        type: string
+        default: ""
+      model:
+        description: "Model size"
+        type: choice
+        options:
+        - small
+        - medium
+        - large
+      strategy:
+        description: "Review strategy"
+        type: choice
+        options:
+        - commit
+        - files
+  workflow_call:
+    inputs:
+      ref:
+        required: false
+        type: string
+        default: ${{ github.ref }}
+      prompt:
+        required: false
+        type: string
+        default: ""
+      prompt-extra:
+        required: false
+        type: string
+        default: ""
+      model:
+        required: false
+        type: string
+        default: "medium"
+      strategy:
+        description: "Review strategy"
+        type: string
+        default: "commit"
+    secrets:
+      PORTKEY_API_KEY:
+        required: true
+
+jobs:
+  llm:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      checks: read
+      pull-requests: read
+
+    outputs:
+      pr: ${{ steps.llm.outputs.pr }}
+      comment: ${{ steps.llm.outputs.comment }}
+
+    steps:
+      - name: Prepare prompt
+        run: |
+          prompt_file=$(mktemp --suffix=.md)
+          echo "prompt_file=$prompt_file" >> "$GITHUB_ENV"
+
+          cat <<'EOF' > "$prompt_file"
+          ${{ inputs.prompt }}
+          EOF
+
+          grep -q '[^[:space:]]' "$prompt_file" || \
+          cat <<'EOF' > "$prompt_file"
+          # Run a deep ADSP-SC5xx RPMsg Examples analysis.
+
+          A build is done, for example
+          ```
+          $ export PATH=/opt/analog/cces/3.0.3:/opt/analog/cces/3.0.3/Eclipse:$PATH
+          $ cd echo_example/rpmsg_echo_example_Core1
+          $ cces -nosplash \
+              -application com.analog.crosscore.headlesstools \
+              -data /tmp/cces-workspace \
+              -project . \
+              -cleanBuild all
+          ```
+          Read .github/workflows/build.yml for my build examples.
+
+          You have access to the SHARC SDK is already installed with a valid
+          license at `/opt/analog/cces/` and contain relevant documentation in
+          the README files.
+
+          You shall install pip packages to help you review, test and debug;
+          a venv is already active.
+
+          Do not try to fetch the from analog.com domain directly, due to bot protection
+          guards in place.
+
+          EOF
+
+          if [[ "${{ inputs.strategy }}" == "files" ]]; then
+            cat <<'EOF' >> "$prompt_file"
+          ## File Review Protocol
+
+          Context: Certain files have been modified intentionally to act as markers for review.
+          **Requirement:** When a file is modified in this set, you must review the full-file.
+          Logic:
+          1. Identify files containing the `/* touch */` comment or minor placeholder changes.
+          2. Disregard the placeholder change itself.
+          3. Analyze the entire content of that file.
+          EOF
+          fi
+
+          cat <<'EOF' >> "$prompt_file"
+          ${{ inputs.prompt-extra }}
+          EOF
+
+      - uses: analogdevicesinc/doctools/cloudsmith-auth@action
+        with:
+          namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
+          service-slug: ${{ secrets.CLOUDSMITH_SERVICE_SLUG }}
+          api-key: ${{ secrets.CLOUDSMITH_API_KEY }}
+
+      - name: Install SHARC SDK
+        run: |
+          curl -1sLf \
+            -H "Authorization: Bearer $CLOUDSMITH_API_KEY" \
+            -o adi-cces-linux-amd64-3.0.3.deb \
+            "https://dl.cloudsmith.io/basic/${{ vars.CLOUDSMITH_NAMESPACE }}/restricted/deb/ubuntu/pool/any-version/main/a/ad/adi-cces-3.0.3_3.0.3/adi-cces-linux-amd64-3.0.3.deb"
+
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y \
+            libncursesw6 libc6:i386 libstdc++6:i386
+          sudo ln -sf /lib/x86_64-linux-gnu/libncursesw.so.6 \
+                      /lib/x86_64-linux-gnu/libncursesw.so.5
+          sudo ldconfig
+
+          echo "adi-cces-3.0.3 adi-cces-3.0.3/accept-sla boolean true" \
+            | sudo debconf-set-selections
+          sudo dpkg --force-depends -i adi-cces-linux-amd64-3.0.3.deb
+
+      - name: Install sharcLinux toolchain
+        run: |
+          curl -1sLf \
+            -H "Authorization: Bearer $CLOUDSMITH_API_KEY" \
+            -o sharc-linux-support-files-cces-3.0.3-20250704.tar.xz \
+            "https://dl.cloudsmith.io/basic/${{ vars.CLOUDSMITH_NAMESPACE }}/restricted/raw/versions/3.0.3/sharc-linux-support-files-cces-3.0.3-20250704.tar.xz"
+
+          sudo tar -xJ --no-same-owner \
+            -f sharc-linux-support-files-cces-3.0.3-20250704.tar.xz \
+            -C /opt/analog/cces/3.0.3/
+
+      - name: Install license
+        env:
+          CCES_LICENSE_DAT: ${{ secrets.CCES_LICENSE_DAT }}
+        run: |
+          mkdir -p ~/.analog/cces
+          printf '%s' "$CCES_LICENSE_DAT" > ~/.analog/cces/license.dat
+
+      - name: Set hostname for FLEXlm license check
+        run: |
+          sudo hostname build.analog.com
+          hostname
+
+      - name: Prepare tools
+        shell: bash
+        run: |
+          py_venv="$(mktemp -d)"
+          echo "py_venv=$py_venv" >> "$GITHUB_ENV"
+
+          python3 -m venv $py_venv
+          source $py_venv/bin/activate
+          python3 -m ensurepip --upgrade
+
+      - uses: analogdevicesinc/doctools/llm@action
+        id: llm
+        with:
+          ref: ${{ inputs.ref }}
+          model: ${{ inputs.model }}
+          prompt-file: ${{ env.prompt_file }}
+          api-key: ${{ secrets.PORTKEY_API_KEY }}
+          py-venv: ${{ env.py_venv }}
+
+      - name: Clean-up
+        if: always()
+        run: |
+          rm -f "$prompt_file"
+          rm -rf "$prompt_dir"
+          rm -rf "$skills_dir"
+          rm -rf "$py_venv"
+          rm -rf "$CI_WORKTREE"
+
+  pr-comment:
+    runs-on: ubuntu-slim
+    needs: llm
+    permissions:
+      pull-requests: write
+
+    steps:
+      - uses: analogdevicesinc/doctools/gh-pr-comment@action
+        with:
+          pr: ${{ needs.llm.outputs.pr }}
+          body: ${{ needs.llm.outputs.comment }}
