@@ -230,7 +230,7 @@ static void routeAudio(STREAM_INFO *streamInfo, unsigned numStreams,
 	} /* for each route */
 }
 
-static void inline setStreamInfo(STREAM_ID streamID, unsigned numChannels,
+static inline void setStreamInfo(STREAM_ID streamID, unsigned numChannels,
 				 unsigned numFrames, unsigned wordSize,
 				 void *data, bool flush, bool invalidate)
 {
