@@ -30,17 +30,17 @@ struct sharc_resource_table {
 	unsigned int offset[1];
 	struct fw_rsc_vdev rpmsg_vdev;
 	struct fw_rsc_vdev_vring vring[2];
-}RL_PACKED_END;
+} RL_PACKED_END;
 
 RL_PACKED_BEGIN
-struct adi_resource_table{
+struct adi_resource_table {
 	uint8_t tag[16];
 	uint32_t version;
 	uint32_t initialized;
 	uint32_t reserved[8];
 
 	struct sharc_resource_table tbl;
-}RL_PACKED_END;
+} RL_PACKED_END;
 
 const struct adi_resource_table rsc_tbl_local = {
 		.tag = "AD-RESOURCE-TBL",
@@ -81,8 +81,7 @@ struct rpmsg_lite_instance rpmsg_ARM_channel;
 
 uint32_t rpmsg_binding_complete = 0x00000000;
 
-
-struct rpmsg_lite_instance * get_rpmsg_arm_channel(void)
+struct rpmsg_lite_instance *get_rpmsg_arm_channel(void)
 {
 	return &rpmsg_ARM_channel;
 }
@@ -90,7 +89,7 @@ struct rpmsg_lite_instance * get_rpmsg_arm_channel(void)
 /*
  * Helper struct which represents memory ranges used by a vring.
  */
-struct _mem_range{
+struct _mem_range {
 	uint32_t start;
 	uint32_t end;
 };
@@ -98,23 +97,30 @@ struct _mem_range{
 /*
  * Helper function which reads memory ranges used by a vring.
  */
-void vring_get_descriptor_range(struct fw_rsc_vdev_vring *vring, struct _mem_range *range){
+void vring_get_descriptor_range(struct fw_rsc_vdev_vring *vring,
+				struct _mem_range *range)
+{
 	struct vring_desc *desc = (struct vring_desc *)vring->da;
 	range->start = (uint32_t)desc;
 	range->end = (uint32_t)desc + vring_size(vring->num, vring->align);
 }
-void vring_get_buffer_range(struct fw_rsc_vdev_vring *vring, struct _mem_range *range){
+void vring_get_buffer_range(struct fw_rsc_vdev_vring *vring,
+			    struct _mem_range *range)
+{
 	struct vring_desc *desc = (struct vring_desc *)vring->da;
-	uint32_t num = 2 * vring->num; // vring0 descriptor has pointer to buffers for both vrings
+	uint32_t num =
+		2 *
+		vring->num; // vring0 descriptor has pointer to buffers for both vrings
 	range->start = (uint32_t)desc->addr;
-	range->end = (uint32_t)desc->addr + num * (RL_BUFFER_PAYLOAD_SIZE +16);
+	range->end = (uint32_t)desc->addr + num * (RL_BUFFER_PAYLOAD_SIZE + 16);
 }
 
-void init_rsc_tbl(void) {
+void init_rsc_tbl(void)
+{
 	// The delay is required after cache is disabled
 	platform_time_delay(200);
 
-	switch(adi_core_id()){
+	switch (adi_core_id()) {
 	case ADI_CORE_ARM:
 		return;
 	case ADI_CORE_SHARC0:
@@ -122,8 +128,10 @@ void init_rsc_tbl(void) {
 		resource_table = &___MCAPI_common_start.tbl;
 		break;
 	case ADI_CORE_SHARC1:
-		adi_resource_table = (struct adi_resource_table *)
-			((uint32_t)&___MCAPI_common_start + ADI_RESOURCE_TABLE_SHARC1_OFFSET);
+		adi_resource_table =
+			(struct adi_resource_table
+				 *)((uint32_t)&___MCAPI_common_start +
+				    ADI_RESOURCE_TABLE_SHARC1_OFFSET);
 		resource_table = &adi_resource_table->tbl;
 		break;
 	default:
@@ -132,10 +140,11 @@ void init_rsc_tbl(void) {
 	}
 
 	/* Don't initialize if remoteproc driver has already */
-	if(strcmp((const char *)adi_resource_table->tag, (const char *)rsc_tbl_local.tag)){
+	if (strcmp((const char *)adi_resource_table->tag,
+		   (const char *)rsc_tbl_local.tag)) {
 		*adi_resource_table = rsc_tbl_local;
 
-		switch(adi_core_id()){
+		switch (adi_core_id()) {
 		case ADI_CORE_ARM:
 			return;
 		case ADI_CORE_SHARC0:
@@ -152,11 +161,11 @@ void init_rsc_tbl(void) {
 			// should never happen
 			break;
 		}
-
 	}
 }
 
-int rsc_tbl_ready(void) {
+int rsc_tbl_ready(void)
+{
 	/* 0x1 acknowledge, 0x2 driver found, 0x4 driver ready*/
 	return resource_table->rpmsg_vdev.status == 7;
 }
@@ -164,7 +173,7 @@ int rsc_tbl_ready(void) {
 void rsc_table_init_and_wait(void)
 {
 	init_rsc_tbl();
-	while(!rsc_tbl_ready()){
+	while (!rsc_tbl_ready()) {
 		/* Wait for resource table to be initialized by ARM*/
 	}
 }
@@ -172,7 +181,8 @@ void rsc_table_init_and_wait(void)
 /*
  * Initialize rpmsg channel to ARM core
  */
-int rpmsg_init_channel_to_ARM(void){
+int rpmsg_init_channel_to_ARM(void)
+{
 	struct rpmsg_lite_instance *rpmsg_instance;
 	adiCacheStatus status;
 	struct _mem_range range0;
@@ -185,10 +195,9 @@ int rpmsg_init_channel_to_ARM(void){
 	range0.start = min(range0.start, range1.start);
 	range0.end = max(range0.end, range1.end);
 	// Disable cache for the descriptors memory range
-	status = adi_cache_set_range ((void *)range0.start,
-						(void *)(range0.end),
-						adi_cache_rr6,
-						adi_cache_noncacheable_range);
+	status = adi_cache_set_range((void *)range0.start, (void *)(range0.end),
+				     adi_cache_rr6,
+				     adi_cache_noncacheable_range);
 	// The delay is required after cache is disabled
 	platform_time_delay(200);
 
@@ -196,19 +205,17 @@ int rpmsg_init_channel_to_ARM(void){
 	// vring1 has its own descriptors but share buffers with vring0
 	vring_get_buffer_range(&resource_table->vring[0], &range1);
 	// Disable cache for the vring buffer range
-	status = adi_cache_set_range ((void *)range1.start,
-						(void *)(range1.end),
-						adi_cache_rr7,
-						adi_cache_noncacheable_range);
+	status = adi_cache_set_range((void *)range1.start, (void *)(range1.end),
+				     adi_cache_rr7,
+				     adi_cache_noncacheable_range);
 	// The delay is required after cache is disabled
 	platform_time_delay(200);
 
-	rpmsg_instance = rpmsg_lite_remote_init(
-			&resource_table->rpmsg_vdev,
-			RL_PLATFORM_SHARC_ARM_LINK_ID,
-			RL_SHM_VDEV,
-			&rpmsg_ARM_channel);
-	if(rpmsg_instance == RL_NULL){
+	rpmsg_instance = rpmsg_lite_remote_init(&resource_table->rpmsg_vdev,
+						RL_PLATFORM_SHARC_ARM_LINK_ID,
+						RL_SHM_VDEV,
+						&rpmsg_ARM_channel);
+	if (rpmsg_instance == RL_NULL) {
 		return -1;
 	}
 

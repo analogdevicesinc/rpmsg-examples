@@ -20,11 +20,11 @@
 
 #ifdef _MISRA_RULES
 #pragma diag(push)
-#pragma diag(suppress:misra_rule_1_1)
-#pragma diag(suppress:misra_rule_6_3)
-#pragma diag(suppress:misra_rule_8_10)
-#pragma diag(suppress:misra_rule_10_1_a)
-#pragma diag(suppress:misra_rule_11_3)
+#pragma diag(suppress : misra_rule_1_1)
+#pragma diag(suppress : misra_rule_6_3)
+#pragma diag(suppress : misra_rule_8_10)
+#pragma diag(suppress : misra_rule_10_1_a)
+#pragma diag(suppress : misra_rule_11_3)
 #endif /* _MISRA_RULES */
 
 #pragma file_attr("libData=HeapTable")
@@ -35,19 +35,17 @@
 extern "asm" unsigned long ldf_heap_space;
 extern "asm" unsigned long ldf_heap_length;
 
-const __heap_desc_t heap_table[2] =
-{
+const __heap_desc_t heap_table[2] = {
 
-  { &ldf_heap_space, (unsigned long) &ldf_heap_length, 0 },
+	{ &ldf_heap_space, (unsigned long)&ldf_heap_length, 0 },
 
-  { (void *)0, (size_t)0, 0 } /* This terminates the table. */
+	{ (void *)0, (size_t)0, 0 } /* This terminates the table. */
 };
 
 #if CHAR_BIT != 8
-#  error This source must be compiled with -char-size-8
+#error This source must be compiled with -char-size-8
 #endif
 
 #ifdef _MISRA_RULES
 #pragma diag(pop)
 #endif /* _MISRA_RULES */
-

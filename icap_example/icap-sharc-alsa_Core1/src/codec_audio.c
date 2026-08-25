@@ -19,16 +19,15 @@ volatile unsigned DACOUT = 0;
 
 void dacAudioOut(void *buffer, uint32_t maxSize, void *usrPtr)
 {
-    APP_CONTEXT *context = (APP_CONTEXT *)usrPtr;
+	APP_CONTEXT *context = (APP_CONTEXT *)usrPtr;
 
-    /* Clear the contents */
-    memset(buffer, 0, maxSize);
+	/* Clear the contents */
+	memset(buffer, 0, maxSize);
 
-    /* Process audio */
-    processAudio(context, STREAM_ID_CODEC_OUT,
-        DAC_DMA_CHANNELS, SYSTEM_BLOCK_SIZE, sizeof(SYSTEM_AUDIO_TYPE),
-        buffer, true
-    );
+	/* Process audio */
+	processAudio(context, STREAM_ID_CODEC_OUT, DAC_DMA_CHANNELS,
+		     SYSTEM_BLOCK_SIZE, sizeof(SYSTEM_AUDIO_TYPE), buffer,
+		     true);
 
-    DACOUT++;
+	DACOUT++;
 }

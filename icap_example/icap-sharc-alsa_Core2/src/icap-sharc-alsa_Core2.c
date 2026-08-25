@@ -11,11 +11,11 @@
 
 int main(int argc, char **argv)
 {
-    /* Keep from constantly hitting the automatic main() breakpoint in
+	/* Keep from constantly hitting the automatic main() breakpoint in
      * the while() loop below */
-    asm("nop;");
+	asm("nop;");
 
-    while (1) {
-        asm("nop;");
-    }
+	while (1) {
+		asm("nop;");
+	}
 }

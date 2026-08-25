@@ -16,7 +16,6 @@
 #include <rpmsg_ns.h>
 #include <icap_device.h>
 
-
 extern struct rpmsg_lite_instance rpmsg_ARM_channel;
 extern struct icap_instance icap_sharc_alsa_playback;
 extern struct icap_device_buffer icap_sharc_alsa_playback_buffer;

@@ -25,7 +25,10 @@
 #include "route.h"
 
 /* Misc defines */
-#define UNUSED(expr) do { (void)(expr); } while (0)
+#define UNUSED(expr)          \
+	do {                  \
+		(void)(expr); \
+	} while (0)
 
 /*
  * WARNING: While reasonable effort has gone into uniformly using a
@@ -39,34 +42,33 @@
  *          audio processing functions in 'codec_audio.c'.
  *
  */
-#define SYSTEM_MCLK_RATE            (24576000)
-#define SYSTEM_SAMPLE_RATE          (48000)
-#define SYSTEM_BLOCK_SIZE           (64)
-#define SYSTEM_AUDIO_TYPE           int32_t
-#define SYSTEM_MAX_CHANNELS         (32)
+#define SYSTEM_MCLK_RATE (24576000)
+#define SYSTEM_SAMPLE_RATE (48000)
+#define SYSTEM_BLOCK_SIZE (64)
+#define SYSTEM_AUDIO_TYPE int32_t
+#define SYSTEM_MAX_CHANNELS (32)
 
 /* In/Out are from the perspective of the SHARC */
 
-#define DAC_DMA_CHANNELS            (16)
+#define DAC_DMA_CHANNELS (16)
 #define LINUX_AUDIO_IN_CHANNELS_MAX (16)
 #define LINUX_AUDIO_IN_CHANNELS_MIN (1)
-#define LINUX_AUDIO_OUT_CHANNELS    (16)
+#define LINUX_AUDIO_OUT_CHANNELS (16)
 #define LINUX_AUDIO_OUT_RATE 48000
 
-#define ICAP_RECORD_EN   // record updates are commented with this Macro
+#define ICAP_RECORD_EN // record updates are commented with this Macro
 /*
  * The main application context.  Used as a container for a
  * variety of useful pointers, handles, etc., between various
  * modules and subsystems.
  */
 typedef struct _APP_CONTEXT {
-
-    /* Device handles */
-    sTWI *twi2Handle;
-    sTWI *adau1962TwiHandle;
-    sSPORT *dacSportOutHandle;
-    /* Audio routing table */
-    ROUTE_INFO *routingTable;
+	/* Device handles */
+	sTWI *twi2Handle;
+	sTWI *adau1962TwiHandle;
+	sSPORT *dacSportOutHandle;
+	/* Audio routing table */
+	ROUTE_INFO *routingTable;
 
 } APP_CONTEXT;
 

@@ -25,11 +25,11 @@ volatile unsigned LINUXIN = 0;
 
 void linuxAudioIn(void *buffer, uint32_t maxSize, void *usrPtr)
 {
-    APP_CONTEXT *context = (APP_CONTEXT *)usrPtr;
+	APP_CONTEXT *context = (APP_CONTEXT *)usrPtr;
 
-    UNUSED(context);
+	UNUSED(context);
 
-    /*
+	/*
      * This buffer is for audio from ALSA.  It should be passed by reference
      * to ALSA if possible. It is in SHARC0 L2 cached memory and will be
      * invalidated by process_audio().  If it's not possible to pass by
@@ -44,10 +44,10 @@ void linuxAudioIn(void *buffer, uint32_t maxSize, void *usrPtr)
      *
      */
 
-    int32_t* ptr = buffer;
-    for (int i=0; i<maxSize/sizeof(ptr[0]); ++i) {
-        *ptr++ = get_s32(&icap_sharc_alsa_playback_buffer);
-    }
+	int32_t *ptr = buffer;
+	for (int i = 0; i < maxSize / sizeof(ptr[0]); ++i) {
+		*ptr++ = get_s32(&icap_sharc_alsa_playback_buffer);
+	}
 
-    LINUXIN++;
+	LINUXIN++;
 }

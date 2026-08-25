@@ -18,9 +18,10 @@
 #include "route.h"
 
 void processAudio(APP_CONTEXT *context, STREAM_ID streamID,
-    unsigned numChannels, unsigned numFrames, unsigned wordSize,
-    void *data, bool flush);
+		  unsigned numChannels, unsigned numFrames, unsigned wordSize,
+		  void *data, bool flush);
 
-void clearStreamBuffer(STREAM_ID streamID, unsigned int sinkOffset, unsigned int channels);
+void clearStreamBuffer(STREAM_ID streamID, unsigned int sinkOffset,
+		       unsigned int channels);
 
 #endif

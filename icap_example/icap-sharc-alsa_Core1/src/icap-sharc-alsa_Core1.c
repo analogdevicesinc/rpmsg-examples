@@ -23,7 +23,6 @@
 #include "twi_simple.h"
 #include "sport_simple.h"
 
-
 /* Project includes */
 #include "context.h"
 #include "init.h"
@@ -39,20 +38,18 @@
 #define syslog_print(...)
 #define syslog_printf(...)
 
-
 typedef enum _CHANNEL_ROUTE {
-    CHANNEL_ROUTE_DISABLE = 0,  // channel 1 to 12 observe in the 1-12 DAC output
-	CHANNEL_ROUTE_ENABLE,  // channel 4 to 16 observe in the 1-12 DAC output
+	CHANNEL_ROUTE_DISABLE =
+		0, // channel 1 to 12 observe in the 1-12 DAC output
+	CHANNEL_ROUTE_ENABLE, // channel 4 to 16 observe in the 1-12 DAC output
 	CHANNEL_ROUTE_INVALID
 } CHANNEL_ROUTE;
-
 
 #ifdef ROUTE_ENABLE
 unsigned route_setting = CHANNEL_ROUTE_ENABLE;
 #else
 unsigned route_setting = CHANNEL_ROUTE_DISABLE;
 #endif
-
 
 extern struct icap_instance icap_sharc_alsa_playback;
 #ifdef ICAP_RECORD_EN
@@ -69,8 +66,9 @@ void ConfigSoftSwitches_ADAU_Reset(void);
 
 /* Idle function for performance measurement purposes */
 #pragma never_inline
-void idle_asm(void) {
-   asm volatile("idle;");
+void idle_asm(void)
+{
+	asm volatile("idle;");
 }
 
 /***********************************************************************
@@ -78,93 +76,89 @@ void idle_asm(void) {
  **********************************************************************/
 int main(int argc, char **argv)
 {
+	APP_CONTEXT *context = &mainAppContext;
+	TWI_SIMPLE_RESULT twiResult;
+	SPORT_SIMPLE_RESULT sportResult;
 
-    APP_CONTEXT *context = &mainAppContext;
-    TWI_SIMPLE_RESULT twiResult;
-    SPORT_SIMPLE_RESULT sportResult;
+	/* Initialize the SEC */
+	adi_sec_Init();
 
-    /* Initialize the SEC */
-    adi_sec_Init();
+	/* Initialize the application context */
+	memset(context, 0, sizeof(*context));
 
-    /* Initialize the application context */
-    memset(context, 0, sizeof(*context));
-
-    /* Switch Configuration */
+	/* Switch Configuration */
 	Switch_Configurator();
 
-    /* Initialize GPIO */
-    gpio_init();
+	/* Initialize GPIO */
+	gpio_init();
 
-    /* Init the system heaps */
-    umm_heap_init();
+	/* Init the system heaps */
+	umm_heap_init();
 
-    syslog_printf("twi_init\n");
-    /* Initialize the simple TWI driver */
-    twiResult = twi_init();
+	syslog_printf("twi_init\n");
+	/* Initialize the simple TWI driver */
+	twiResult = twi_init();
 
-    /* Initialize the simple SPORT driver */
-    syslog_printf("sport_init\n");
-    sportResult = sport_init();
+	/* Initialize the simple SPORT driver */
+	syslog_printf("sport_init\n");
+	sportResult = sport_init();
 
+	/* Open up a global device handle for TWI2 @ 400KHz */
+	syslog_printf("twi_setSpeed\n");
+	twiResult = twi_open(TWI2, &context->twi2Handle);
+	twi_setSpeed(context->twi2Handle, TWI_SIMPLE_SPEED_400);
 
-    /* Open up a global device handle for TWI2 @ 400KHz */
-    syslog_printf("twi_setSpeed\n");
-    twiResult = twi_open(TWI2, &context->twi2Handle);
-    twi_setSpeed(context->twi2Handle, TWI_SIMPLE_SPEED_400);
+	/* Set the adau1962 and soft switch device handles to TWI2 */
+	context->adau1962TwiHandle = context->twi2Handle;
 
-    /* Set the adau1962 and soft switch device handles to TWI2 */
-    context->adau1962TwiHandle = context->twi2Handle;
+	syslog_printf("rpmsg_initialize\n");
 
-    syslog_printf("rpmsg_initialize\n");
+	/* Disable main MCLK/BCLK */
+	syslog_printf("disable mclk\n");
+	disable_mclk(context);
 
-    /* Disable main MCLK/BCLK */
-    syslog_printf("disable mclk\n");
-    disable_mclk(context);
+	/* Initialize main MCLK/BCLK */
+	mclk_init(context);
 
-    /* Initialize main MCLK/BCLK */
-    mclk_init(context);
+	/* Initialize the ADAU1962 DAC */
+	adau1962_init(context);
+	twiResult = twi_close(&context->twi2Handle);
+	/* Enable main MCLK/BCLK for a synchronous start */
+	enable_mclk(context);
 
-    /* Initialize the ADAU1962 DAC */
-    adau1962_init(context);
-    twiResult = twi_close(&context->twi2Handle);
-    /* Enable main MCLK/BCLK for a synchronous start */
-    enable_mclk(context);
+	/* Initialize rpmsg and icap channels to linux */
+	rpmsg_initialize();
 
-    /* Initialize rpmsg and icap channels to linux */
-    rpmsg_initialize();
+	/* Initialize the audio routing table */
+	syslog_printf("audio_routing_init\n");
+	audio_routing_init(context);
 
-    /* Initialize the audio routing table */
-    syslog_printf("audio_routing_init\n");
-    audio_routing_init(context);
+	syslog_printf("Started\n");
 
-    syslog_printf("Started\n");
+	extern void apply_playback_settings(char **argv);
 
-    extern void apply_playback_settings(char **argv);
+	const char *inputargs[] = { "00", "linux", "codec", "16", NULL };
 
-    const char* inputargs[] = { "00", "linux", "codec", "16", NULL};
+	apply_playback_settings((char **)inputargs);
 
-    apply_playback_settings((char**)inputargs);
-
-    /* Drop into the shell */
-    while (1) {
-        icap_loop(&icap_sharc_alsa_playback);
+	/* Drop into the shell */
+	while (1) {
+		icap_loop(&icap_sharc_alsa_playback);
 #ifdef ICAP_RECORD_EN
-        icap_loop(&icap_sharc_alsa_record);
+		icap_loop(&icap_sharc_alsa_record);
 #endif
-        idle_asm();
-     }
+		idle_asm();
+	}
 }
-
 
 void Switch_Configurator()
 {
-	int delay11=0xffff;
+	int delay11 = 0xffff;
 
 	/* Software Switch Configuration for Enabling ADC-DAC */
 	ConfigSoftSwitches_ADC_DAC();
 
-	while(delay11--)
-	{
+	while (delay11--) {
 		asm("nop;");
 	}
 
@@ -172,9 +166,8 @@ void Switch_Configurator()
 	ConfigSoftSwitches_ADAU_Reset();
 
 	/* wait for Codec to up */
-	delay11=0xffff;
-	while(delay11--)
-	{
+	delay11 = 0xffff;
+	while (delay11--) {
 		asm("nop;");
 	}
 }

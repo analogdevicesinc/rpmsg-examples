@@ -12,14 +12,11 @@
 
 #include "adi_initialize.h"
 
-
 int32_t adi_initComponents(void)
 {
 	int32_t result = 0;
 
 	result = adi_sec_Init();
 
-
 	return result;
 }
-

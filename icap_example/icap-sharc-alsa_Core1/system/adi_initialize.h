@@ -24,4 +24,3 @@ int32_t adi_initComponents(void);
 #endif
 
 #endif /* __ADI_COMPONENT_INIT_H__ */
-

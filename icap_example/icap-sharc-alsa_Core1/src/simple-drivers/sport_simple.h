@@ -38,27 +38,27 @@
  * @brief Simple SPORT driver clock master/slave
  ******************************************************************/
 typedef enum SPORT_SIMPLE_CLK_DIR {
-    SPORT_SIMPLE_CLK_DIR_UNKNOWN = 0,  /**< Invalid bit clock direction */
-    SPORT_SIMPLE_CLK_DIR_MASTER,       /**< Bit clock master (out) */
-    SPORT_SIMPLE_CLK_DIR_SLAVE         /**< Bit clock slave (in) */
+	SPORT_SIMPLE_CLK_DIR_UNKNOWN = 0, /**< Invalid bit clock direction */
+	SPORT_SIMPLE_CLK_DIR_MASTER, /**< Bit clock master (out) */
+	SPORT_SIMPLE_CLK_DIR_SLAVE /**< Bit clock slave (in) */
 } SPORT_SIMPLE_CLK_DIR;
 
 /*!****************************************************************
  * @brief Simple SPORT driver frame sync clock master/slave
  ******************************************************************/
 typedef enum SPORT_SIMPLE_FS_DIR {
-    SPORT_SIMPLE_FS_DIR_UNKNOWN = 0,  /**< Invalid sync direction */
-    SPORT_SIMPLE_FS_DIR_MASTER,       /**< Sync clock master (out) */
-    SPORT_SIMPLE_FS_DIR_SLAVE         /**< Sync clock slave (in) */
+	SPORT_SIMPLE_FS_DIR_UNKNOWN = 0, /**< Invalid sync direction */
+	SPORT_SIMPLE_FS_DIR_MASTER, /**< Sync clock master (out) */
+	SPORT_SIMPLE_FS_DIR_SLAVE /**< Sync clock slave (in) */
 } SPORT_SIMPLE_FS_DIR;
 
 /*!****************************************************************
  * @brief Simple SPORT driver data rx/tx direction
  ******************************************************************/
 typedef enum SPORT_SIMPLE_DATA_DIR {
-    SPORT_SIMPLE_DATA_DIR_UNKNOWN = 0,  /**< Invalid direction */
-    SPORT_SIMPLE_DATA_DIR_RX,           /**< Data receive */
-    SPORT_SIMPLE_DATA_DIR_TX            /**< Data transmit */
+	SPORT_SIMPLE_DATA_DIR_UNKNOWN = 0, /**< Invalid direction */
+	SPORT_SIMPLE_DATA_DIR_RX, /**< Data receive */
+	SPORT_SIMPLE_DATA_DIR_TX /**< Data transmit */
 } SPORT_SIMPLE_DATA_DIR;
 
 /*!****************************************************************
@@ -67,10 +67,11 @@ typedef enum SPORT_SIMPLE_DATA_DIR {
  * in the audio buffers when both data pins are active.
  ******************************************************************/
 typedef enum SPORT_SIMPLE_ENABLE {
-    SPORT_SIMPLE_ENABLE_NONE      = 0, /**< Enable no data pins */
-    SPORT_SIMPLE_ENABLE_PRIMARY   = 1, /**< Enable SPORT Primary Data Pin */
-    SPORT_SIMPLE_ENABLE_SECONDARY = 2, /**< Enable SPORT Secondary Data Pin */
-    SPORT_SIMPLE_ENABLE_BOTH      = 3, /**< Enable both SPORT Data Pins */
+	SPORT_SIMPLE_ENABLE_NONE = 0, /**< Enable no data pins */
+	SPORT_SIMPLE_ENABLE_PRIMARY = 1, /**< Enable SPORT Primary Data Pin */
+	SPORT_SIMPLE_ENABLE_SECONDARY =
+		2, /**< Enable SPORT Secondary Data Pin */
+	SPORT_SIMPLE_ENABLE_BOTH = 3, /**< Enable both SPORT Data Pins */
 } SPORT_SIMPLE_ENABLE;
 
 /*!****************************************************************
@@ -78,21 +79,21 @@ typedef enum SPORT_SIMPLE_ENABLE {
  * Default is 32-bit
  ******************************************************************/
 typedef enum SPORT_SIMPLE_WORD_SIZE {
-    SPORT_SIMPLE_WORD_SIZE_UNKNOWN =  0, /**< Invalid word size */
-    SPORT_SIMPLE_WORD_SIZE_16BIT   = 16, /**< 16-bit word size */
-    SPORT_SIMPLE_WORD_SIZE_32BIT   = 32, /**< 32-bit word size */
+	SPORT_SIMPLE_WORD_SIZE_UNKNOWN = 0, /**< Invalid word size */
+	SPORT_SIMPLE_WORD_SIZE_16BIT = 16, /**< 16-bit word size */
+	SPORT_SIMPLE_WORD_SIZE_32BIT = 32, /**< 32-bit word size */
 } SPORT_SIMPLE_WORD_SIZE;
 
 /*!****************************************************************
  * @brief Simple SPORT driver TDM slot settings.
  ******************************************************************/
 typedef enum SPORT_SIMPLE_TDM {
-    SPORT_SIMPLE_TDM_UNKNOWN = 0,  /**< Invalid TDM mode */
-    SPORT_SIMPLE_TDM_2       = 2,  /**< 2 slot TDM mode (I2S) */
-    SPORT_SIMPLE_TDM_4       = 4,  /**< 4 slot TDM mode */
-    SPORT_SIMPLE_TDM_8       = 8,  /**< 8 slot TDM mode */
-    SPORT_SIMPLE_TDM_16      = 16, /**< 16 slot TDM mode */
-    SPORT_SIMPLE_TDM_32      = 32  /**< 32 slot TDM mode */
+	SPORT_SIMPLE_TDM_UNKNOWN = 0, /**< Invalid TDM mode */
+	SPORT_SIMPLE_TDM_2 = 2, /**< 2 slot TDM mode (I2S) */
+	SPORT_SIMPLE_TDM_4 = 4, /**< 4 slot TDM mode */
+	SPORT_SIMPLE_TDM_8 = 8, /**< 8 slot TDM mode */
+	SPORT_SIMPLE_TDM_16 = 16, /**< 16 slot TDM mode */
+	SPORT_SIMPLE_TDM_32 = 32 /**< 32 slot TDM mode */
 } SPORT_SIMPLE_TDM;
 
 /*!****************************************************************
@@ -102,10 +103,10 @@ typedef enum SPORT_SIMPLE_TDM {
  * first data slot (TDM).  These settings can be or'd together.
  ******************************************************************/
 typedef enum SPORT_SIMPLE_FS_OPTION {
-    SPORT_SIMPLE_FS_OPTION_DEFAULT = 0, /**< Default settings  */
-    SPORT_SIMPLE_FS_OPTION_INV     = 1, /**< Falling edge frame sync (I2S) */
-    SPORT_SIMPLE_FS_OPTION_EARLY   = 2, /**< Early frame sync (I2S) */
-    SPORT_SIMPLE_FS_OPTION_50      = 4  /**< 50% duty cycle frame sync (I2S) */
+	SPORT_SIMPLE_FS_OPTION_DEFAULT = 0, /**< Default settings  */
+	SPORT_SIMPLE_FS_OPTION_INV = 1, /**< Falling edge frame sync (I2S) */
+	SPORT_SIMPLE_FS_OPTION_EARLY = 2, /**< Early frame sync (I2S) */
+	SPORT_SIMPLE_FS_OPTION_50 = 4 /**< 50% duty cycle frame sync (I2S) */
 } SPORT_SIMPLE_FS_OPTION;
 
 /*!****************************************************************
@@ -113,45 +114,45 @@ typedef enum SPORT_SIMPLE_FS_OPTION {
  * Default setting is clock on the rising edge, sample on falling (TDM)
  ******************************************************************/
 typedef enum SPORT_SIMPLE_CLK_OPTION {
-    SPORT_SIMPLE_CLK_DEFAULT = 0,  /**< Default settings */
-    SPORT_SIMPLE_CLK_FALLING       /**< Assert on the falling edge, sample on rising (I2S) */
+	SPORT_SIMPLE_CLK_DEFAULT = 0, /**< Default settings */
+	SPORT_SIMPLE_CLK_FALLING /**< Assert on the falling edge, sample on rising (I2S) */
 } SPORT_SIMPLE_CLK_OPTION;
 
 /*!****************************************************************
  * @brief Simple SPORT driver API result codes.
  ******************************************************************/
 typedef enum SPORT_SIMPLE_RESULT {
-    SPORT_SIMPLE_SUCCESS = 0,         /**< No error */
-    SPORT_SIMPLE_INVALID_SPORT,       /**< Invalid SPORT open */
-    SPORT_SIMPLE_SPORT_BUSY,          /**< SPORT already open */
-    SPORT_SIMPLE_CFG_ERROR,           /**< SPORT configuration error */
-    SPORT_SIMPLE_ERROR                /**< Generic SPORT error */
+	SPORT_SIMPLE_SUCCESS = 0, /**< No error */
+	SPORT_SIMPLE_INVALID_SPORT, /**< Invalid SPORT open */
+	SPORT_SIMPLE_SPORT_BUSY, /**< SPORT already open */
+	SPORT_SIMPLE_CFG_ERROR, /**< SPORT configuration error */
+	SPORT_SIMPLE_ERROR /**< Generic SPORT error */
 } SPORT_SIMPLE_RESULT;
 
 /*!****************************************************************
  * @brief Hardware SPORT
  ******************************************************************/
 typedef enum SPORT_SIMPLE_PORT {
-    SPORT0A,
-    SPORT0B,
-    SPORT1A,
-    SPORT1B,
-    SPORT2A,
-    SPORT2B,
-    SPORT3A,
-    SPORT3B,
+	SPORT0A,
+	SPORT0B,
+	SPORT1A,
+	SPORT1B,
+	SPORT2A,
+	SPORT2B,
+	SPORT3A,
+	SPORT3B,
 #if defined(__ADSPSC589_FAMILY__) || defined(__ADSP21569_FAMILY__) || \
-    defined(__ADSPSC594_FAMILY__) || defined(__ADSPSC598_FAMILY__)
-    SPORT4A,
-    SPORT4B,
-    SPORT5A,
-    SPORT5B,
-    SPORT6A,
-    SPORT6B,
-    SPORT7A,
-    SPORT7B,
+	defined(__ADSPSC594_FAMILY__) || defined(__ADSPSC598_FAMILY__)
+	SPORT4A,
+	SPORT4B,
+	SPORT5A,
+	SPORT5B,
+	SPORT6A,
+	SPORT6B,
+	SPORT7A,
+	SPORT7B,
 #endif
-    SPORT_END
+	SPORT_END
 } SPORT_SIMPLE_PORT;
 
 /*!****************************************************************
@@ -165,7 +166,7 @@ typedef struct sSPORT sSPORT;
 typedef struct SPORT_SIMPLE_CONFIG SPORT_SIMPLE_CONFIG;
 
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
 
 /*!****************************************************************
@@ -185,7 +186,7 @@ extern "C"{
  * @return  None
  ******************************************************************/
 typedef void (*SPORT_SIMPLE_AUDIO_CALLBACK)(void *buffer, uint32_t size,
-    void *usrPtr);
+					    void *usrPtr);
 
 /*!****************************************************************
  *  @brief Simple SPORT driver initialization routine.
@@ -275,7 +276,7 @@ SPORT_SIMPLE_RESULT sport_close(sSPORT **sportHandle);
  *         an error.
  ******************************************************************/
 SPORT_SIMPLE_RESULT sport_configure(sSPORT *sportHandle,
-    SPORT_SIMPLE_CONFIG *config);
+				    SPORT_SIMPLE_CONFIG *config);
 
 /*!****************************************************************
  * @brief Simple SPORT driver buffer size calculator.
@@ -340,38 +341,37 @@ SPORT_SIMPLE_RESULT sport_stop(sSPORT *sportHandle);
  * @brief SPORT configuration parameters
  ******************************************************************/
 struct SPORT_SIMPLE_CONFIG {
+	/** Bit clock direction (master/slave) */
+	SPORT_SIMPLE_CLK_DIR clkDir;
 
-    /** Bit clock direction (master/slave) */
-    SPORT_SIMPLE_CLK_DIR clkDir;
+	/** Frame sync clock direction (master/slave) */
+	SPORT_SIMPLE_FS_DIR fsDir;
 
-    /** Frame sync clock direction (master/slave) */
-    SPORT_SIMPLE_FS_DIR fsDir;
+	/** Bit clock options */
+	SPORT_SIMPLE_CLK_OPTION bitClkOptions;
 
-    /** Bit clock options */
-    SPORT_SIMPLE_CLK_OPTION bitClkOptions;
+	/** Frame sync options */
+	uint32_t fsOptions;
 
-    /** Frame sync options */
-    uint32_t fsOptions;
+	/** Data direction (rx/tx) */
+	SPORT_SIMPLE_DATA_DIR dataDir;
 
-    /** Data direction (rx/tx) */
-    SPORT_SIMPLE_DATA_DIR dataDir;
+	/** Data pins to enable */
+	SPORT_SIMPLE_ENABLE dataEnable;
 
-    /** Data pins to enable */
-    SPORT_SIMPLE_ENABLE dataEnable;
+	/** TDM slots */
+	SPORT_SIMPLE_TDM tdmSlots;
 
-    /** TDM slots */
-    SPORT_SIMPLE_TDM tdmSlots;
+	/** TDM / DMA word size */
+	SPORT_SIMPLE_WORD_SIZE wordSize;
 
-    /** TDM / DMA word size */
-    SPORT_SIMPLE_WORD_SIZE wordSize;
+	/** Number of TDM frames to DMA before callback (latency) */
+	uint16_t frames;
 
-    /** Number of TDM frames to DMA before callback (latency) */
-    uint16_t frames;
+	/** Frame Sync frequency (SPORT_SIMPLE_CLK_DIR_MASTER mode only) */
+	uint32_t fs;
 
-    /** Frame Sync frequency (SPORT_SIMPLE_CLK_DIR_MASTER mode only) */
-    uint32_t fs;
-
-    /**
+	/**
      * By default, all TDM slots defined by 'tdmSlots' are configured for
      * data transfer on all data pins enabled by 'dataEnable'.  For larger
      * TDM settings (i.e. SPORT_SIMPLE_TDM_[8,16,32]) this can result
@@ -400,9 +400,9 @@ struct SPORT_SIMPLE_CONFIG {
      *       be obtained using standard pulse frame sync TDM mode.
      *
      */
-    uint32_t slotMask;
+	uint32_t slotMask;
 
-    /**
+	/**
      * Pointers to buffers to holding audio data.  Each buffer should
      * point to an array of size 'tdmSlots * dataEnable * frames' comprised
      * of 'wordSize' elements.  The size of the buffer in bytes can be
@@ -413,27 +413,26 @@ struct SPORT_SIMPLE_CONFIG {
      * cached memory.  The driver will flush/invalidate the buffers as
      * necessary.
      */
-    void *dataBuffers[2];
+	void *dataBuffers[2];
 
-    /** Set to true if the data buffers are in cached memory */
-    bool dataBuffersCached;
+	/** Set to true if the data buffers are in cached memory */
+	bool dataBuffersCached;
 
-    /**
+	/**
      * Set to true for tighter synchronization between the DMA work unit
      * completion and audio callback.  May cause SPORT underruns for very
      * high bandwidth streams.
      */
-    bool syncDMA;
+	bool syncDMA;
 
-    /**
+	/**
      * Provide a link to a callback function upon completion.  Can be
      * NULL for no callback.
      */
-    SPORT_SIMPLE_AUDIO_CALLBACK callBack;
+	SPORT_SIMPLE_AUDIO_CALLBACK callBack;
 
-    /** User pointer passed to the audio callback function */
-    void *usrPtr;
-
+	/** User pointer passed to the audio callback function */
+	void *usrPtr;
 };
 
 #endif

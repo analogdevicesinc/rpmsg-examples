@@ -26,7 +26,7 @@ struct icap_instance icap_sharc_alsa_record;
 
 struct rpmsg_lite_ept_static_context icap_sharc_alsa_record_endpoint_context;
 
-struct icap_device_buffer icap_sharc_alsa_record_buffer = {.buf_id = 1};
+struct icap_device_buffer icap_sharc_alsa_record_buffer = { .buf_id = 1 };
 
 struct icap_subdevice_features sport_record_device_features = {
 	.type = ICAP_DEV_RECORD,
@@ -35,17 +35,17 @@ struct icap_subdevice_features sport_record_device_features = {
 	.channels_min = LINUX_AUDIO_OUT_CHANNELS,
 	.channels_max = LINUX_AUDIO_OUT_CHANNELS,
 	.formats = ICAP_FMTBIT_S32_LE,
-#if LINUX_AUDIO_OUT_RATE==16000	
+#if LINUX_AUDIO_OUT_RATE == 16000
 	.rates = ICAP_RATE_16000,
-#elif LINUX_AUDIO_OUT_RATE==48000
+#elif LINUX_AUDIO_OUT_RATE == 48000
 	.rates = ICAP_RATE_48000,
-#else	
-	#error wrong linux audio out samplerate	
-#endif	
+#else
+#error wrong linux audio out samplerate
+#endif
 };
 
-
-int32_t disable_record_cache(void) {
+int32_t disable_record_cache(void)
+{
 	uint32_t start, end;
 	int32_t ret;
 	adi_cache_set_disable_range(adi_cache_rr5);
@@ -54,15 +54,12 @@ int32_t disable_record_cache(void) {
 	end = start + icap_sharc_alsa_record_buffer.descr.buf_size;
 
 	// Disable cache for the descriptors memory range
-	ret = adi_cache_set_range ((void *)start,
-						(void *)(end),
-						adi_cache_rr5,
-						adi_cache_noncacheable_range);
+	ret = adi_cache_set_range((void *)start, (void *)(end), adi_cache_rr5,
+				  adi_cache_noncacheable_range);
 	// The delay is required after cache is disabled
 	platform_time_delay(200);
 	return ret;
 }
-
 
 int create_icap_sharc_alsa_record_endpoint(void)
 {
@@ -70,12 +67,11 @@ int create_icap_sharc_alsa_record_endpoint(void)
 	int ret;
 
 	rpmsg_ept = rpmsg_lite_create_ept(
-			&rpmsg_ARM_channel,
-			ICAP_SHARC_ALSA_RECORD_EP_ADDRESS, /* + adi_core_id(),*/
-			&icap_call_back,
-			(void*)&icap_sharc_alsa_record,
-			&icap_sharc_alsa_record_endpoint_context);
-	if(rpmsg_ept == RL_NULL){
+		&rpmsg_ARM_channel,
+		ICAP_SHARC_ALSA_RECORD_EP_ADDRESS, /* + adi_core_id(),*/
+		&icap_call_back, (void *)&icap_sharc_alsa_record,
+		&icap_sharc_alsa_record_endpoint_context);
+	if (rpmsg_ept == RL_NULL) {
 		return -1;
 	}
 	return 0;
@@ -83,15 +79,13 @@ int create_icap_sharc_alsa_record_endpoint(void)
 
 int announce_icap_sharc_alsa_record_endpoint(void)
 {
-	struct rpmsg_lite_endpoint *rpmsg_ept = icap_sharc_alsa_record.transport.rpmsg_ept;
+	struct rpmsg_lite_endpoint *rpmsg_ept =
+		icap_sharc_alsa_record.transport.rpmsg_ept;
 	int ret;
 
-	ret = rpmsg_ns_announce(
-			&rpmsg_ARM_channel,
-			rpmsg_ept,
-			"sharc-alsa",
-			RL_NS_CREATE);
-	if(ret != RL_SUCCESS){
+	ret = rpmsg_ns_announce(&rpmsg_ARM_channel, rpmsg_ept, "sharc-alsa",
+				RL_NS_CREATE);
+	if (ret != RL_SUCCESS) {
 		return -1;
 	}
 	return 0;
@@ -102,19 +96,16 @@ int remove_icap_sharc_alsa_record_endpoint(void)
 	struct rpmsg_lite_endpoint *rpmsg_ept;
 	int ret;
 
-	ret = rpmsg_ns_announce(
-			icap_sharc_alsa_record.transport.rpmsg_instance,
-			icap_sharc_alsa_record.transport.rpmsg_ept,
-			"sharc-alsa",
-			RL_NS_DESTROY);
-	if(ret) {
+	ret = rpmsg_ns_announce(icap_sharc_alsa_record.transport.rpmsg_instance,
+				icap_sharc_alsa_record.transport.rpmsg_ept,
+				"sharc-alsa", RL_NS_DESTROY);
+	if (ret) {
 		return ret;
 	}
 	return rpmsg_lite_destroy_ept(
-			icap_sharc_alsa_record.transport.rpmsg_instance,
-			icap_sharc_alsa_record.transport.rpmsg_ept);
+		icap_sharc_alsa_record.transport.rpmsg_instance,
+		icap_sharc_alsa_record.transport.rpmsg_ept);
 }
-
 
 int32_t icap_sharc_alsa_record_get_subdevices(struct icap_instance *icap)
 {
@@ -123,18 +114,22 @@ int32_t icap_sharc_alsa_record_get_subdevices(struct icap_instance *icap)
 }
 
 /* Copy features from corresponding icap-linux-soport stream params*/
-int32_t icap_sharc_alsa_record_get_subdevice_features(struct icap_instance *icap, uint32_t subdev_id, struct icap_subdevice_features *features)
+int32_t icap_sharc_alsa_record_get_subdevice_features(
+	struct icap_instance *icap, uint32_t subdev_id,
+	struct icap_subdevice_features *features)
 {
-	if (subdev_id >= 1){
+	if (subdev_id >= 1) {
 		return -ICAP_ERROR_INVALID;
 	}
-	memcpy(features, &sport_record_device_features, sizeof(struct icap_subdevice_features));
+	memcpy(features, &sport_record_device_features,
+	       sizeof(struct icap_subdevice_features));
 	return 0;
 }
 
-int32_t icap_sharc_alsa_record_start(struct icap_instance *icap, uint32_t subdev_id)
+int32_t icap_sharc_alsa_record_start(struct icap_instance *icap,
+				     uint32_t subdev_id)
 {
-	if (subdev_id >= 1){
+	if (subdev_id >= 1) {
 		return -ICAP_ERROR_INVALID;
 	}
 	icap_sharc_alsa_record_buffer.acks = 0;
@@ -142,23 +137,27 @@ int32_t icap_sharc_alsa_record_start(struct icap_instance *icap, uint32_t subdev
 	return 0;
 }
 
-int32_t icap_sharc_alsa_record_stop(struct icap_instance *icap, uint32_t subdev_id)
+int32_t icap_sharc_alsa_record_stop(struct icap_instance *icap,
+				    uint32_t subdev_id)
 {
-	if (subdev_id >= 1){
+	if (subdev_id >= 1) {
 		return -ICAP_ERROR_INVALID;
 	}
 	icap_sharc_alsa_record_buffer.in_use = 0;
 	return 0;
 }
 
-int32_t icap_sharc_alsa_record_add_src(struct icap_instance *icap, struct icap_buf_descriptor *buf)
+int32_t icap_sharc_alsa_record_add_src(struct icap_instance *icap,
+				       struct icap_buf_descriptor *buf)
 {
 	return -ICAP_ERROR_NOT_SUP;
 }
 
-int32_t icap_sharc_alsa_record_add_dst(struct icap_instance *icap, struct icap_buf_descriptor *buf)
+int32_t icap_sharc_alsa_record_add_dst(struct icap_instance *icap,
+				       struct icap_buf_descriptor *buf)
 {
-	memcpy(&icap_sharc_alsa_record_buffer.descr, buf, sizeof(struct icap_buf_descriptor));
+	memcpy(&icap_sharc_alsa_record_buffer.descr, buf,
+	       sizeof(struct icap_buf_descriptor));
 	icap_sharc_alsa_record_buffer.offset = 0;
 	icap_sharc_alsa_record_buffer.frag_level = 0;
 	icap_sharc_alsa_record_buffer.icap = icap;
@@ -168,44 +167,45 @@ int32_t icap_sharc_alsa_record_add_dst(struct icap_instance *icap, struct icap_b
 	return icap_sharc_alsa_record_buffer.buf_id;
 }
 
-int32_t icap_sharc_alsa_record_frag_ready_response(struct icap_instance *icap, int32_t buf_id)
+int32_t icap_sharc_alsa_record_frag_ready_response(struct icap_instance *icap,
+						   int32_t buf_id)
 {
-	if(icap_sharc_alsa_record_buffer.buf_id == buf_id) {
+	if (icap_sharc_alsa_record_buffer.buf_id == buf_id) {
 		icap_sharc_alsa_record_buffer.acks--;
 	}
 	return 0;
 }
 
-
 struct icap_device_callbacks icap_sharc_alsa_record_callbacks = {
-		.get_subdevices = icap_sharc_alsa_record_get_subdevices,
-		.get_subdevice_features = icap_sharc_alsa_record_get_subdevice_features,
-		.add_src = icap_sharc_alsa_record_add_src,
-		.add_dst = icap_sharc_alsa_record_add_dst,
-		.start = icap_sharc_alsa_record_start,
-		.stop = icap_sharc_alsa_record_stop,
-		.frag_ready_response = icap_sharc_alsa_record_frag_ready_response,
+	.get_subdevices = icap_sharc_alsa_record_get_subdevices,
+	.get_subdevice_features = icap_sharc_alsa_record_get_subdevice_features,
+	.add_src = icap_sharc_alsa_record_add_src,
+	.add_dst = icap_sharc_alsa_record_add_dst,
+	.start = icap_sharc_alsa_record_start,
+	.stop = icap_sharc_alsa_record_stop,
+	.frag_ready_response = icap_sharc_alsa_record_frag_ready_response,
 };
-
 
 int init_sharc_alsa_record(void)
 {
 	int ret;
 
 	ret = create_icap_sharc_alsa_record_endpoint();
-	if(ret) {
+	if (ret) {
 		return ret;
 	}
 
 	icap_sharc_alsa_record.transport.rpmsg_instance = &rpmsg_ARM_channel;
-	icap_sharc_alsa_record.transport.rpmsg_ept = &icap_sharc_alsa_record_endpoint_context.ept;
-	ret = icap_device_init(&icap_sharc_alsa_record, "record", &icap_sharc_alsa_record_callbacks, NULL);
-	if(ret) {
+	icap_sharc_alsa_record.transport.rpmsg_ept =
+		&icap_sharc_alsa_record_endpoint_context.ept;
+	ret = icap_device_init(&icap_sharc_alsa_record, "record",
+			       &icap_sharc_alsa_record_callbacks, NULL);
+	if (ret) {
 		return ret;
 	}
 
 	ret = announce_icap_sharc_alsa_record_endpoint();
-	if(ret) {
+	if (ret) {
 		return ret;
 	}
 	return 0;

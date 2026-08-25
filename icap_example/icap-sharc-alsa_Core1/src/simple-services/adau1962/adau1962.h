@@ -17,10 +17,9 @@
 #include "twi_simple.h"
 
 // ADAU1962 service return values
-typedef enum
-{
-    ADAU1962_SUCCESS,  // Successful API call
-    ADAU1962_ERROR     // General failure
+typedef enum {
+	ADAU1962_SUCCESS, // Successful API call
+	ADAU1962_ERROR // General failure
 } ADAU1962_RESULT;
 
 ADAU1962_RESULT init_adau1962(sTWI *twi, uint8_t adau_address);

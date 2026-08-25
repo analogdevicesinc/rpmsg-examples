@@ -12,8 +12,8 @@
 #ifndef _clocks_h
 #define _clocks_h
 
-#define CCLK         (1000000000)
-#define SCLK0        (CCLK / 8)
+#define CCLK (1000000000)
+#define SCLK0 (CCLK / 8)
 
 /*
  * Need to override and round up the TWI prescale for the TWI simple

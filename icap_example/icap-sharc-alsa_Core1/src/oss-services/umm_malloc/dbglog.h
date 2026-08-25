@@ -56,57 +56,62 @@
 #undef DBGLOG_LEVEL_ERROR
 #undef DBGLOG_LEVEL_CRITICAL
 
-#define DBGLOG_LEVEL_TRACE     6
-#define DBGLOG_LEVEL_DEBUG     5
-#define DBGLOG_LEVEL_INFO      4
-#define DBGLOG_LEVEL_WARNING   3
-#define DBGLOG_LEVEL_ERROR     2
-#define DBGLOG_LEVEL_CRITICAL  1
+#define DBGLOG_LEVEL_TRACE 6
+#define DBGLOG_LEVEL_DEBUG 5
+#define DBGLOG_LEVEL_INFO 4
+#define DBGLOG_LEVEL_WARNING 3
+#define DBGLOG_LEVEL_ERROR 2
+#define DBGLOG_LEVEL_CRITICAL 1
 
 #ifndef DBGLOG_LEVEL
-#  define DBGLOG_LEVEL 0
+#define DBGLOG_LEVEL 0
 #endif
 
 #ifndef DBGLOG_FUNCTION
-#  define DBGLOG_FUNCTION printf
+#define DBGLOG_FUNCTION printf
 #endif
 
 /* ------------------------------------------------------------------------- */
 
 #if DBGLOG_LEVEL >= DBGLOG_LEVEL_TRACE
-#  define DBGLOG_TRACE(format, ...) DBGLOG_FUNCTION(format, ## __VA_ARGS__)
+#define DBGLOG_TRACE(format, ...) DBGLOG_FUNCTION(format, ##__VA_ARGS__)
 #else
-#  define DBGLOG_TRACE(format, ...)
+#define DBGLOG_TRACE(format, ...)
 #endif
 
 #if DBGLOG_LEVEL >= DBGLOG_LEVEL_DEBUG
-#  define DBGLOG_DEBUG(format, ...) DBGLOG_FUNCTION(format, ## __VA_ARGS__)
+#define DBGLOG_DEBUG(format, ...) DBGLOG_FUNCTION(format, ##__VA_ARGS__)
 #else
-#  define DBGLOG_DEBUG(format, ...)
+#define DBGLOG_DEBUG(format, ...)
 #endif
 
 #if DBGLOG_LEVEL >= DBGLOG_LEVEL_CRITICAL
-#  define DBGLOG_CRITICAL(format, ...) DBGLOG_FUNCTION(format, ## __VA_ARGS__)
+#define DBGLOG_CRITICAL(format, ...) DBGLOG_FUNCTION(format, ##__VA_ARGS__)
 #else
-#  define DBGLOG_CRITICAL(format, ...)
+#define DBGLOG_CRITICAL(format, ...)
 #endif
 
 #if DBGLOG_LEVEL >= DBGLOG_LEVEL_ERROR
-#  define DBGLOG_ERROR(format, ...) DBGLOG_FUNCTION(format, ## __VA_ARGS__)
+#define DBGLOG_ERROR(format, ...) DBGLOG_FUNCTION(format, ##__VA_ARGS__)
 #else
-#  define DBGLOG_ERROR(format, ...)
+#define DBGLOG_ERROR(format, ...)
 #endif
 
 #if DBGLOG_LEVEL >= DBGLOG_LEVEL_WARNING
-#  define DBGLOG_WARNING(format, ...) DBGLOG_FUNCTION(format, ## __VA_ARGS__)
+#define DBGLOG_WARNING(format, ...) DBGLOG_FUNCTION(format, ##__VA_ARGS__)
 #else
-#  define DBGLOG_WARNING(format, ...)
+#define DBGLOG_WARNING(format, ...)
 #endif
 
 #if DBGLOG_LEVEL >= DBGLOG_LEVEL_INFO
-#  define DBGLOG_INFO(format, ...) DBGLOG_FUNCTION(format, ## __VA_ARGS__)
+#define DBGLOG_INFO(format, ...) DBGLOG_FUNCTION(format, ##__VA_ARGS__)
 #else
-#  define DBGLOG_INFO(format, ...)
+#define DBGLOG_INFO(format, ...)
 #endif
 
-#define DBGLOG_FORCE(force, format, ...) {if(force) {DBGLOG_FUNCTION(format, ## __VA_ARGS__);}}
+#define DBGLOG_FORCE(force, format, ...)                        \
+	{                                                       \
+		if (force) {                                    \
+			DBGLOG_FUNCTION(format, ##__VA_ARGS__); \
+		}                                               \
+	}

@@ -39,36 +39,36 @@
  *        in clocks.h
  ******************************************************************/
 #ifndef SCLK0
-#define SCLK0  100000000
+#define SCLK0 100000000
 #endif
 
 /*!****************************************************************
  * @brief Hardware TWI ports.
  ******************************************************************/
 typedef enum TWI_SIMPLE_PORT {
-    TWI0    = (0),      /**< TWI port 0 */
-    TWI1    = (1),      /**< TWI port 1 */
-    TWI2    = (2),      /**< TWI port 2 */
-    TWI_END             /**< End TWI ports */
+	TWI0 = (0), /**< TWI port 0 */
+	TWI1 = (1), /**< TWI port 1 */
+	TWI2 = (2), /**< TWI port 2 */
+	TWI_END /**< End TWI ports */
 } TWI_SIMPLE_PORT;
 
 /*!****************************************************************
  * @brief Standard Simple TWI driver speed options.
  ******************************************************************/
 typedef enum TWI_SIMPLE_SPEED {
-    TWI_SIMPLE_SPEED_100 = 100u,       /**< TWI speed 100KHz */
-    TWI_SIMPLE_SPEED_400 = 400u        /**< TWI speed 400KHz */
+	TWI_SIMPLE_SPEED_100 = 100u, /**< TWI speed 100KHz */
+	TWI_SIMPLE_SPEED_400 = 400u /**< TWI speed 400KHz */
 } TWI_SIMPLE_SPEED;
 
 /*!****************************************************************
  * @brief Simple TWI driver API result codes.
  ******************************************************************/
 typedef enum TWI_SIMPLE_RESULT {
-    TWI_SIMPLE_SUCCESS,          /**< No error */
-    TWI_SIMPLE_INVALID_PORT,     /**< Invalid TWI port open */
-    TWI_SIMPLE_PORT_BUSY,        /**< TWI port is already opened */
-    TWI_SIMPLE_ERROR,            /**< Generic error */
-    TWI_SIMPLE_BAD_LENGTH        /**< Transfer length is too long (>254) */
+	TWI_SIMPLE_SUCCESS, /**< No error */
+	TWI_SIMPLE_INVALID_PORT, /**< Invalid TWI port open */
+	TWI_SIMPLE_PORT_BUSY, /**< TWI port is already opened */
+	TWI_SIMPLE_ERROR, /**< Generic error */
+	TWI_SIMPLE_BAD_LENGTH /**< Transfer length is too long (>254) */
 } TWI_SIMPLE_RESULT;
 
 /*!****************************************************************
@@ -77,7 +77,7 @@ typedef enum TWI_SIMPLE_RESULT {
 typedef struct sTWI sTWI;
 
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
 
 /*!****************************************************************
@@ -187,8 +187,8 @@ TWI_SIMPLE_RESULT twi_setSpeed(sTWI *twiHandle, TWI_SIMPLE_SPEED speed);
  * @return Returns TWI_SIMPLE_SUCCESS if successful, otherwise
  *         an error.
  ******************************************************************/
-TWI_SIMPLE_RESULT twi_read(sTWI *twiHandle, uint8_t address,
-    uint8_t *in, uint16_t inLen);
+TWI_SIMPLE_RESULT twi_read(sTWI *twiHandle, uint8_t address, uint8_t *in,
+			   uint16_t inLen);
 
 /*!****************************************************************
  * @brief Simple TWI write.
@@ -209,8 +209,8 @@ TWI_SIMPLE_RESULT twi_read(sTWI *twiHandle, uint8_t address,
  * @return Returns TWI_SIMPLE_SUCCESS if successful, otherwise
  *         an error.
  ******************************************************************/
-TWI_SIMPLE_RESULT twi_write(sTWI *twiHandle, uint8_t address,
-    uint8_t *out, uint16_t outLen);
+TWI_SIMPLE_RESULT twi_write(sTWI *twiHandle, uint8_t address, uint8_t *out,
+			    uint16_t outLen);
 
 /*!****************************************************************
  * @brief Simple TWI write-read.
@@ -234,8 +234,8 @@ TWI_SIMPLE_RESULT twi_write(sTWI *twiHandle, uint8_t address,
  * @return Returns TWI_SIMPLE_SUCCESS if successful, otherwise
  *         an error.
  ******************************************************************/
-TWI_SIMPLE_RESULT twi_writeRead(sTWI *twiHandle, uint8_t address,
-    uint8_t *out, uint16_t outLen, uint8_t *in, uint16_t inLen);
+TWI_SIMPLE_RESULT twi_writeRead(sTWI *twiHandle, uint8_t address, uint8_t *out,
+				uint16_t outLen, uint8_t *in, uint16_t inLen);
 
 /*!****************************************************************
  * @brief Simple TWI write-write.
@@ -258,8 +258,9 @@ TWI_SIMPLE_RESULT twi_writeRead(sTWI *twiHandle, uint8_t address,
  * @return Returns TWI_SIMPLE_SUCCESS if successful, otherwise
  *         an error.
  ******************************************************************/
-TWI_SIMPLE_RESULT twi_writeWrite(sTWI *twiHandle, uint8_t address,
-    uint8_t *out, uint16_t outLen, uint8_t *out2, uint16_t out2Len);
+TWI_SIMPLE_RESULT twi_writeWrite(sTWI *twiHandle, uint8_t address, uint8_t *out,
+				 uint16_t outLen, uint8_t *out2,
+				 uint16_t out2Len);
 
 #ifdef __cplusplus
 } // extern "C"

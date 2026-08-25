@@ -20,11 +20,9 @@ int32_t adi_initComponents(void)
 
 	result = adi_sec_Init();
 
-
 	if (result == 0) {
 		result = adi_SRU_Init(); /* auto-generated code (order:0) */
 	}
 
 	return result;
 }
-

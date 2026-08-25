@@ -23,6 +23,6 @@
 
 void rsc_table_init_and_wait(void);
 int rpmsg_init_channel_to_ARM(void);
-struct rpmsg_lite_instance * get_rpmsg_arm_channel(void);
+struct rpmsg_lite_instance *get_rpmsg_arm_channel(void);
 
 #endif

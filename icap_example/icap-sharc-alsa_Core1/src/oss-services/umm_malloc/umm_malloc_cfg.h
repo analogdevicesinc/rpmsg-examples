@@ -12,7 +12,7 @@
 #define UMM_INTEGRITY_CHECK
 #define UMM_POISON_CHECK
 
-#define UMM_BLOCK_SIZE    64
+#define UMM_BLOCK_SIZE 64
 
 /*
  * End SAM specific configuration for umm_malloc
@@ -69,19 +69,19 @@
 #define UMM_H_ATTPACKPRE
 #define UMM_H_ATTPACKSUF __attribute__((__packed__))
 
-#undef  UMM_BEST_FIT
+#undef UMM_BEST_FIT
 #define UMM_FIRST_FIT
 
 /* Configure the maximum number of blocks via the block mask */
 #define UMM_FREELIST_MASK (0x80000)
-#define UMM_BLOCKNO_MASK  (0x7FFFF)
+#define UMM_BLOCKNO_MASK (0x7FFFF)
 
 /*
  * The block size also determines allocation alignment.  UMM_MALLOC
  * default block size is 8
  */
 #ifndef UMM_BLOCK_SIZE
-#define UMM_BLOCK_SIZE    8
+#define UMM_BLOCK_SIZE 8
 #endif
 #define UMM_MAX_HEAP_SIZE (UMM_BLOCK_SIZE * UMM_BLOCKNO_MASK)
 
@@ -94,25 +94,24 @@
  */
 
 #ifdef UMM_INFO
-  typedef struct UMM_HEAP_INFO_t {
-    unsigned int totalEntries;
-    unsigned int usedEntries;
-    unsigned int freeEntries;
+typedef struct UMM_HEAP_INFO_t {
+	unsigned int totalEntries;
+	unsigned int usedEntries;
+	unsigned int freeEntries;
 
-    unsigned int totalBlocks;
-    unsigned int usedBlocks;
-    unsigned int freeBlocks;
+	unsigned int totalBlocks;
+	unsigned int usedBlocks;
+	unsigned int freeBlocks;
 
-    unsigned int maxFreeContiguousBlocks;
-  }
-  UMM_HEAP_INFO;
+	unsigned int maxFreeContiguousBlocks;
+} UMM_HEAP_INFO;
 
-  extern UMM_HEAP_INFO ummHeapInfo;
+extern UMM_HEAP_INFO ummHeapInfo;
 
-  void *umm_info( umm_heap_t heap, UMM_HEAP_INFO *ummHeapInfo, void *ptr, int force );
-  size_t umm_free_heap_size( umm_heap_t heap );
+void *umm_info(umm_heap_t heap, UMM_HEAP_INFO *ummHeapInfo, void *ptr,
+	       int force);
+size_t umm_free_heap_size(umm_heap_t heap);
 #endif
-
 
 /*
  * A couple of macros to make it easier to protect the memory allocator
@@ -147,12 +146,12 @@
  */
 
 #ifdef UMM_INTEGRITY_CHECK
-   int umm_integrity_check( umm_heap_t heap );
-#  define INTEGRITY_CHECK(x) umm_integrity_check(x)
-   extern void umm_corruption(void);
-#  define UMM_HEAP_CORRUPTION_CB(x) printf( "Heap Corruption (Heap #%d)!", x )
+int umm_integrity_check(umm_heap_t heap);
+#define INTEGRITY_CHECK(x) umm_integrity_check(x)
+extern void umm_corruption(void);
+#define UMM_HEAP_CORRUPTION_CB(x) printf("Heap Corruption (Heap #%d)!", x)
 #else
-#  define INTEGRITY_CHECK() 0
+#define INTEGRITY_CHECK() 0
 #endif
 
 /*
@@ -188,14 +187,14 @@
 #define UMM_POISONED_BLOCK_LEN_TYPE short
 
 #ifdef UMM_POISON_CHECK
-   void *umm_poison_malloc( umm_heap_t heap, size_t size );
-   void *umm_poison_calloc( umm_heap_t heap, size_t num, size_t size );
-   void *umm_poison_realloc( umm_heap_t heap, void *ptr, size_t size );
-   void  umm_poison_free( umm_heap_t heap, void *ptr );
-   int   umm_poison_check( umm_heap_t heap );
-#  define POISON_CHECK(x) umm_poison_check(x)
+void *umm_poison_malloc(umm_heap_t heap, size_t size);
+void *umm_poison_calloc(umm_heap_t heap, size_t num, size_t size);
+void *umm_poison_realloc(umm_heap_t heap, void *ptr, size_t size);
+void umm_poison_free(umm_heap_t heap, void *ptr);
+int umm_poison_check(umm_heap_t heap);
+#define POISON_CHECK(x) umm_poison_check(x)
 #else
-#  define POISON_CHECK() 0
+#define POISON_CHECK() 0
 #endif
 
 #endif /* _UMM_MALLOC_CFG_H */

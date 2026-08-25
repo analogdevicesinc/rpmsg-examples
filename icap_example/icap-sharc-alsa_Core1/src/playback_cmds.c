@@ -42,65 +42,64 @@ const char inputargs[] =
     " No arguments\n";
 **********************************************************************/
 
-
 STREAM_ID str2stream(char *stream, bool src)
 {
-    if (strcmp(stream, "codec") == 0) {
-        return(src ? STREAM_ID_CODEC_IN : STREAM_ID_CODEC_OUT);
-    } else if (strcmp(stream, "linux") == 0 || strcmp(stream, "wav") == 0) {
-        return(src ? STREAM_ID_LINUX_IN : STREAM_ID_LINUX_OUT);
-    } else if (strcmp(stream, "off") == 0) {
-        return(STREAM_ID_UNKNOWN);
-    }
+	if (strcmp(stream, "codec") == 0) {
+		return (src ? STREAM_ID_CODEC_IN : STREAM_ID_CODEC_OUT);
+	} else if (strcmp(stream, "linux") == 0 || strcmp(stream, "wav") == 0) {
+		return (src ? STREAM_ID_LINUX_IN : STREAM_ID_LINUX_OUT);
+	} else if (strcmp(stream, "off") == 0) {
+		return (STREAM_ID_UNKNOWN);
+	}
 
-    return(STREAM_ID_MAX);
+	return (STREAM_ID_MAX);
 }
 
 void apply_playback_settings(char **argv)
 {
-    ROUTE_INFO *route;
-    unsigned idx, srcOffset, sinkOffset, channels, attenuation, mix, channel_route;
-    STREAM_ID srcID, sinkID;
+	ROUTE_INFO *route;
+	unsigned idx, srcOffset, sinkOffset, channels, attenuation, mix,
+		channel_route;
+	STREAM_ID srcID, sinkID;
 
-    char *endptr;
-    long val ;
+	char *endptr;
+	long val;
 
-    val = strtol(argv[0], &endptr, 10);
-    idx = (unsigned)val;
+	val = strtol(argv[0], &endptr, 10);
+	idx = (unsigned)val;
 
-    route = context->routingTable + idx;
-    srcID = route->srcID;
-    srcOffset = route->srcOffset;
-    sinkID = route->sinkID;
-    sinkOffset = route->sinkOffset;
-    channels = route->channels;
-    channel_route = route->channel_route;
+	route = context->routingTable + idx;
+	srcID = route->srcID;
+	srcOffset = route->srcOffset;
+	sinkID = route->sinkID;
+	sinkOffset = route->sinkOffset;
+	channels = route->channels;
+	channel_route = route->channel_route;
 
-    /* Gather the source info */
-    srcID = str2stream(argv[1], true);
-    srcOffset = 0;
+	/* Gather the source info */
+	srcID = str2stream(argv[1], true);
+	srcOffset = 0;
 
+	/* Gather the sink info */
 
-    /* Gather the sink info */
+	sinkID = str2stream(argv[2], false);
+	sinkOffset = 0;
 
-    sinkID = str2stream(argv[2], false);
-    sinkOffset = 0;
+	/* Get the number of channels */
 
-    /* Get the number of channels */
+	val = strtol(argv[3], &endptr, 10);
+	channels = (unsigned)val;
 
-    val = strtol(argv[3], &endptr, 10);
-    channels = (unsigned)val;
+	/* Get the channel routing value */
 
-    /* Get the channel routing value */
+	channel_route = route_setting;
 
-    channel_route = route_setting;
+	clearStreamBuffer(route->sinkID, route->sinkOffset, route->channels);
 
-    clearStreamBuffer(route->sinkID, route->sinkOffset, route->channels);
-
-    route->srcID = srcID;
-    route->srcOffset = srcOffset;
-    route->sinkID = sinkID;
-    route->sinkOffset = sinkOffset;
-    route->channels = channels;
-    route->channel_route = channel_route;
+	route->srcID = srcID;
+	route->srcOffset = srcOffset;
+	route->sinkID = sinkID;
+	route->sinkOffset = sinkOffset;
+	route->channels = channels;
+	route->channel_route = channel_route;
 }
