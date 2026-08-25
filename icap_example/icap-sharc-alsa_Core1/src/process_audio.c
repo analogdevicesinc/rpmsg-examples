@@ -101,19 +101,14 @@ void clearStreamBuffer(STREAM_ID streamID, unsigned sinkOffset,
 		       unsigned channels)
 {
 	STREAM_INFO *stream;
-	size_t size;
 	unsigned ch;
 
 	// If the stream ID is invalid, do nothing
-	if (streamID == STREAM_ID_UNKNOWN) {
+	if (streamID == STREAM_ID_UNKNOWN)
 		return;
-	}
 
 	// Get the stream info structure for the given stream ID
 	stream = &STREAMS[streamID];
-
-	// Calculate the total size to clear per frame (not used directly below)
-	size = (size_t)channels * stream->numFrames * stream->wordSize;
 
 	// Loop over both data buffers: primary (data) and alternate (altData)
 	for (int d = 0; d < 2; ++d) {
