@@ -55,7 +55,7 @@ extern uint32_t linux_in_channels;
 static void invalidateStreams(STREAM_INFO *streamInfo)
 {
     STREAM_INFO *stream;
-    unsigned size;
+    size_t size;
     unsigned i;
 
     /* Invalidate all active streams if requested */
@@ -63,7 +63,7 @@ static void invalidateStreams(STREAM_INFO *streamInfo)
         stream = &streamInfo[i];
         if ( (stream->streamID != STREAM_ID_UNKNOWN) ) {
             if (stream->flush && stream->invalidate) {
-                size = stream->numChannels * stream->numFrames * stream->wordSize;
+                size = (size_t)stream->numChannels * stream->numFrames * stream->wordSize;
                 flush_data_buffer(
                     stream->data, (char *)stream->data + size,
                     ADI_FLUSH_DATA_INV
@@ -77,7 +77,7 @@ static void invalidateStreams(STREAM_INFO *streamInfo)
 static void flushStreams(STREAM_INFO *streamInfo)
 {
     STREAM_INFO *stream;
-    unsigned size;
+    size_t size;
     unsigned i;
 
     /* Flush all active streams if requested */
@@ -85,7 +85,7 @@ static void flushStreams(STREAM_INFO *streamInfo)
         stream = &streamInfo[i];
         if ( (stream->streamID != STREAM_ID_UNKNOWN) ) {
             if (stream->flush && !stream->invalidate) {
-                size = stream->numChannels * stream->numFrames * stream->wordSize;
+                size = (size_t)stream->numChannels * stream->numFrames * stream->wordSize;
                 flush_data_buffer(
                     stream->data, (char *)stream->data + size,
                     ADI_FLUSH_DATA_NOINV
@@ -109,7 +109,7 @@ static void flushStreams(STREAM_INFO *streamInfo)
 void clearStreamBuffer(STREAM_ID streamID, unsigned sinkOffset, unsigned channels)
 {
     STREAM_INFO *stream;
-    unsigned size;
+    size_t size;
     unsigned ch;
 
     // If the stream ID is invalid, do nothing
@@ -121,7 +121,7 @@ void clearStreamBuffer(STREAM_ID streamID, unsigned sinkOffset, unsigned channel
     stream = &STREAMS[streamID];
 
     // Calculate the total size to clear per frame (not used directly below)
-    size = channels * stream->numFrames * stream->wordSize;
+    size = (size_t)channels * stream->numFrames * stream->wordSize;
 
     // Loop over both data buffers: primary (data) and alternate (altData)
     for (int d=0; d<2; ++d) {
@@ -137,7 +137,7 @@ void clearStreamBuffer(STREAM_ID streamID, unsigned sinkOffset, unsigned channel
                 (char*)data +
                 (sinkOffset + frame * stream->numChannels) * stream->wordSize,
                 0,
-                channels * stream->wordSize
+                (size_t)channels * stream->wordSize
             );
         }
     }
@@ -204,7 +204,7 @@ static void routeAudio(
 		out32 += sink->numChannels;
 	}
 
-	/* This routes data from channels 4–16 to DAC outputs 1–12.*/
+	/* This routes data from channels 4ï¿½16 to DAC outputs 1ï¿½12.*/
 
 	if(channel_route==1)
 	{
