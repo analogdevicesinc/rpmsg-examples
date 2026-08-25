@@ -32,7 +32,7 @@ jobs:
           curl -1sLf \
             -H "Authorization: Bearer $CLOUDSMITH_API_KEY" \
             -o adi-cces-linux-amd64-3.0.3.deb \
-            "https://dl.cloudsmith.io/basic/adi/restricted/deb/ubuntu/pool/any-version/main/a/ad/adi-cces-3.0.3_3.0.3/adi-cces-linux-amd64-3.0.3.deb"
+            "https://dl.cloudsmith.io/basic/${{ vars.CLOUDSMITH_NAMESPACE }}/restricted/deb/ubuntu/pool/any-version/main/a/ad/adi-cces-3.0.3_3.0.3/adi-cces-linux-amd64-3.0.3.deb"
 
           sudo dpkg --add-architecture i386
           sudo apt-get update
