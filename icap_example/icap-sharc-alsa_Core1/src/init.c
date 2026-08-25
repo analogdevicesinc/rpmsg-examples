@@ -14,7 +14,6 @@
 #include <limits.h>
 #include <assert.h>
 #include <stdbool.h>
-#include <assert.h>
 
 /* ADI service includes */
 #include <services/gpio/adi_gpio.h>
