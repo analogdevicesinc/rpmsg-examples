@@ -78,16 +78,20 @@ void apply_playback_settings(char **argv)
 
 	/* Gather the source info */
 	srcID = str2stream(argv[1], true);
+	if (srcID == STREAM_ID_MAX)
+		return;
 	srcOffset = 0;
 
 	/* Gather the sink info */
-
 	sinkID = str2stream(argv[2], false);
+	if (sinkID == STREAM_ID_MAX)
+		return;
 	sinkOffset = 0;
 
 	/* Get the number of channels */
-
 	val = strtol(argv[3], &endptr, 10);
+	if (endptr == argv[3] || *endptr != '\0')
+		return;
 	channels = (unsigned)val;
 
 	/* Get the channel routing value */
