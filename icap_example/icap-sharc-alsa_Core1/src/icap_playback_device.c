@@ -14,7 +14,6 @@
 #include <sys/platform.h>
 #include <sys/adi_core.h>
 #include "context.h"
-#include "context.h"
 
 #define ICAP_SHARC_ALSA_PLAYBACK_EP_ADDRESS 21
 
