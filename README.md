@@ -11,5 +11,8 @@ baremetal examples created with CCES studio.
 |--------|------------|------------|------------------------|
 | N/A    | Bare Metal | Bare Metal | `echo_examples`[^1]    |
 | N/A    | Bare Metal | Bare Metal | `fir_example`          |
+| N/A    | Bare Metal | Bare Metal | `icap_example`[^2]     |
+
+[^2]: ICAP SHARC-ALSA multi-channel audio example (SC598 only). See [`icap_example/README.md`](icap_example/README.md).
 
 [^1]: Included in default ADSP Yocto build

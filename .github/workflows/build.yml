@@ -99,6 +99,26 @@ jobs:
             -project . \
             -cleanBuild all
 
+      - name: Build icap example Core1
+        run: |
+          export PATH=/opt/analog/cces/3.0.3:/opt/analog/cces/3.0.3/Eclipse:$PATH
+          cd icap_example/icap-sharc-alsa_Core1
+          cces -nosplash \
+            -application com.analog.crosscore.headlesstools \
+            -data /tmp/cces-workspace \
+            -project . \
+            -cleanBuild all
+
+      - name: Build icap example Core2
+        run: |
+          export PATH=/opt/analog/cces/3.0.3:/opt/analog/cces/3.0.3/Eclipse:$PATH
+          cd icap_example/icap-sharc-alsa_Core2
+          cces -nosplash \
+            -application com.analog.crosscore.headlesstools \
+            -data /tmp/cces-workspace \
+            -project . \
+            -cleanBuild all
+
       - name: Copy .dxe to .elf
         run: |
           cp echo_example/rpmsg_echo_example_Core1/Debug/rpmsg_echo_example_Core1.dxe \
@@ -107,6 +127,10 @@ jobs:
              echo_example/rpmsg_echo_example_Core2/Debug/rpmsg_echo_example_Core2.elf
           cp fir_example/Debug/rpmsg_shared_mem_example.dxe \
              fir_example/Debug/rpmsg_shared_mem_example.elf
+          cp icap_example/icap-sharc-alsa_Core1/Debug/icap-sharc-alsa_Core1.dxe \
+             icap_example/icap-sharc-alsa_Core1/Debug/icap-sharc-alsa_Core1.elf
+          cp icap_example/icap-sharc-alsa_Core2/Debug/icap-sharc-alsa_Core2.dxe \
+             icap_example/icap-sharc-alsa_Core2/Debug/icap-sharc-alsa_Core2.elf
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -122,6 +146,12 @@ jobs:
             fir_example/Debug/*.ldr
             fir_example/Debug/*.dxe
             fir_example/Debug/*.elf
+            icap_example/icap-sharc-alsa_Core1/Debug/*.ldr
+            icap_example/icap-sharc-alsa_Core1/Debug/*.dxe
+            icap_example/icap-sharc-alsa_Core1/Debug/*.elf
+            icap_example/icap-sharc-alsa_Core2/Debug/*.ldr
+            icap_example/icap-sharc-alsa_Core2/Debug/*.dxe
+            icap_example/icap-sharc-alsa_Core2/Debug/*.elf
 
       - name: Archive firmware for release
         if: github.event_name == 'release'
@@ -135,7 +165,13 @@ jobs:
             echo_example/rpmsg_echo_example_Core2/Debug/*.elf \
             fir_example/Debug/*.ldr \
             fir_example/Debug/*.dxe \
-            fir_example/Debug/*.elf
+            fir_example/Debug/*.elf \
+            icap_example/icap-sharc-alsa_Core1/Debug/*.ldr \
+            icap_example/icap-sharc-alsa_Core1/Debug/*.dxe \
+            icap_example/icap-sharc-alsa_Core1/Debug/*.elf \
+            icap_example/icap-sharc-alsa_Core2/Debug/*.ldr \
+            icap_example/icap-sharc-alsa_Core2/Debug/*.dxe \
+            icap_example/icap-sharc-alsa_Core2/Debug/*.elf
 
       - name: Upload firmware to release
         uses: svenstaro/upload-release-action@v2
