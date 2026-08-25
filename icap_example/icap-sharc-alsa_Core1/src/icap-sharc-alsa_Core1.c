@@ -31,6 +31,7 @@
 #include "rpmsg_arm_ep.h"
 #include "icap.h"
 #include "version.h"
+#include <sys/platform.h>
 
 /*This macro enables or disables the channel routing in DAC*/
 //#define ROUTE_ENABLE
@@ -151,23 +152,17 @@ int main(int argc, char **argv)
 	}
 }
 
-void Switch_Configurator()
+void Switch_Configurator(void)
 {
-	int delay11 = 0xffff;
-
 	/* Software Switch Configuration for Enabling ADC-DAC */
 	ConfigSoftSwitches_ADC_DAC();
 
-	while (delay11--) {
-		asm("nop;");
-	}
+	/* Allow soft-switch I2C writes to settle (5 ms) */
+	platform_time_delay(5);
 
-	/* Software Switch Configuration for Re-Setting ADC-DAC  */
+	/* Software Switch Configuration for Resetting ADC-DAC */
 	ConfigSoftSwitches_ADAU_Reset();
 
-	/* wait for Codec to up */
-	delay11 = 0xffff;
-	while (delay11--) {
-		asm("nop;");
-	}
+	/* Wait for codec to power up (5 ms) */
+	platform_time_delay(5);
 }
