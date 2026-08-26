@@ -127,6 +127,7 @@ jobs:
         if: github.event_name == 'release'
         run: |
           tar -cJvf sharc-firmware-${{ github.event.release.tag_name }}.tar.xz \
+            Makefile \
             echo_example/rpmsg_echo_example_Core1/Debug/*.ldr \
             echo_example/rpmsg_echo_example_Core1/Debug/*.dxe \
             echo_example/rpmsg_echo_example_Core1/Debug/*.elf \
