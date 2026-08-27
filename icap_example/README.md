@@ -77,4 +77,4 @@ For support with issues related to this module, please post question in the [Ana
 
 ### Licensing
 
-The source files included in this project are covered by the license described in the LICENSE file included in this module.  In addition to the source files included in this project the project also pulls in git submodules.  The licensing terms that apply to each submodule are stated in a separate LICENSE file found within that submodule.
+The source files included in this project are covered by the BSD-4-Clause license described in the [LICENSE](../LICENSE) file at the repository root.  In addition to the source files included in this project the project also pulls in git submodules.  The licensing terms that apply to each submodule are stated in a separate LICENSE file found within that submodule.
