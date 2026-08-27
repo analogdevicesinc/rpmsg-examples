@@ -33,6 +33,31 @@ In Capture:
 
 To verify, Uncomment the ROUTE_ENABLE in "icap-sharc-alsa_Core1.c", save and build the code.
 
+### Kernel prerequisite
+
+The `aplay` and `arecord` commands shown below request ALSA buffers that exceed
+the default `buffer_bytes_max` (0x20000 = 128 kB) of the stock
+`sharc-alsa-asoc-card` driver:
+
+| Command | Frames | Bytes (S32_LE, 2 ch) | Stock limit |
+|---------|-------:|---------------------:|------------:|
+| `aplay  --buffer-size=524288` | 524 288 | 4 194 304 B (0x400000) | **exceeds** 0x20000 |
+| `arecord --buffer-size=65536` |  65 536 |   524 288 B (0x80000) | **exceeds** 0x20000 |
+
+Before running the target, apply the kernel patch included in this directory
+to your Linux kernel source tree and rebuild the kernel:
+
+```bash
+cd <linux-kernel-source>
+git am <path-to-rpmsg-examples>/icap_example/0001-ALSA-buffer-size-change-for-mutichannel.patch
+make -j$(nproc)
+```
+
+The patch raises `buffer_bytes_max` to 0x400000 (4 MB) and
+`period_bytes_max` to 0x40000 (256 kB) in
+`sound/soc/adi/sharc-alsa-asoc-card.c`.  Without it both example
+commands will fail with an `ALSA: buffer size error` or similar.
+
 ### Usage
 The "#define ICAP_RECORD_EN" macro in context.h enables capture updates in software. By default, this macro is enabled. To validate playback functionality only, disable the ICAP_RECORD_EN macro.
 
