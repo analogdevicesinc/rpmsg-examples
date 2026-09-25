@@ -163,7 +163,7 @@ static void routeAudio(STREAM_INFO *streamInfo, unsigned numStreams,
 		int32_t *out32 = (int32_t *)sink->data + outChannel;
 		int16_t *out16 = (int16_t *)sink->data + outChannel;
 
-		ip_ptr = (int32_t *)src->data + inChannel;
+		ip_ptr = (int32_t *)sink->data + outChannel;
 		out_ptr = (int32_t *)sink->data + outChannel;
 
 		for (frame = 0; frame < src->numFrames; frame++) {
@@ -197,7 +197,7 @@ static void routeAudio(STREAM_INFO *streamInfo, unsigned numStreams,
 				     in_ch < (int)sink->numChannels;
 				     in_ch++, op_ch++) {
 					out_ptr[fr * sink->numChannels + op_ch] =
-						ip_ptr[fr * src->numChannels +
+						ip_ptr[fr * sink->numChannels +
 						       in_ch];
 				}
 				for (int op_ch = 12;
