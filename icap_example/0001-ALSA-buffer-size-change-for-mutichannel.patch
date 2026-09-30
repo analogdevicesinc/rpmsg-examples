@@ -1,0 +1,30 @@
+From b8e71b5bf38d67b8889edbef38082afc8ae13651 Mon Sep 17 00:00:00 2001
+From: SanthoshRag <santhosh.r@jasmin-infotech.com>
+Date: Mon, 15 Jun 2026 10:28:34 +0530
+Subject: [PATCH] ALSA-buffer-size-change-for-mutichannel
+
+---
+ sound/soc/adi/sharc-alsa-asoc-card.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/sound/soc/adi/sharc-alsa-asoc-card.c b/sound/soc/adi/sharc-alsa-asoc-card.c
+index b63f05b794fc..362ad1f3b846 100644
+--- a/sound/soc/adi/sharc-alsa-asoc-card.c
++++ b/sound/soc/adi/sharc-alsa-asoc-card.c
+@@ -108,10 +108,10 @@ static const struct snd_pcm_hardware sa_pcm_params = {
+ 				SNDRV_PCM_FMTBIT_S24_LE |
+ 				SNDRV_PCM_FMTBIT_S32_LE,
+ 	.period_bytes_min	= 32,
+-	.period_bytes_max	= 0x10000,
++	.period_bytes_max	= 0x40000,
+ 	.periods_min		= 1,
+-	.periods_max		= PAGE_SIZE/32,
+-	.buffer_bytes_max	= 0x20000, /* 128 kbytes */
++	.periods_max		= PAGE_SIZE/4,
++	.buffer_bytes_max	= 0x400000, /* 4 Mbytes */
+ 	.fifo_size			= 16,
+ };
+
+--
+2.54.0
+

@@ -7,3 +7,11 @@
 	path = fir_example/rpmsg-lite
 	url = https://github.com/analogdevicesinc/rpmsg-lite.git
 	branch = master
+[submodule "icap_example/icap"]
+	path = icap_example/icap
+	url = https://github.com/analogdevicesinc/icap.git
+	branch = main
+[submodule "icap_example/rpmsg-lite"]
+	path = icap_example/rpmsg-lite
+	url = https://github.com/analogdevicesinc/rpmsg-lite.git
+	branch = adi/develop/yocto-2.2.0
