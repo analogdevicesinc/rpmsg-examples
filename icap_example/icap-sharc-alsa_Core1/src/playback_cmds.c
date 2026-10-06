@@ -21,18 +21,17 @@
  **********************************************************************/
 static APP_CONTEXT *context = &mainAppContext;
 
-extern unsigned route_setting;
-
 /***********************************************************************
 
 // Details of the play back settings
 const char inputargs[] =
-    "[ <idx> <src> <dst> <channels> <channel route> ]\n"
+	"[ <idx> <src> <src offset> <dst> <dst offset> <channels> ]\n"
     "  idx         - Routing index\n"
-    "  src ID  - Source stream index\n"
-    "  dst ID  - Destination stream index\n"
+	"  src         - Source stream\n"
+	"  src offset  - Source channel offset\n"
+	"  dst         - Destination stream\n"
+	"  dst offset  - Destination channel offset\n"
     "  channels    - Number of channels\n"
-	"  channel route - route which 12 channels to DAC\n"
     " No arguments\n";
 **********************************************************************/
 
@@ -52,14 +51,16 @@ STREAM_ID str2stream(char *stream, bool src)
 void apply_playback_settings(char **argv)
 {
 	ROUTE_INFO *route;
-	unsigned idx, srcOffset, sinkOffset, channels, attenuation, mix,
-		channel_route;
+	unsigned idx, srcOffset, sinkOffset, channels;
 	STREAM_ID srcID, sinkID;
 
 	char *endptr;
 	long val;
 
 	val = strtol(argv[0], &endptr, 10);
+	if (endptr == argv[0] || *endptr != '\0' || val < 0 ||
+	    val >= MAX_AUDIO_ROUTES)
+		return;
 	idx = (unsigned)val;
 
 	route = context->routingTable + idx;
@@ -68,29 +69,32 @@ void apply_playback_settings(char **argv)
 	sinkID = route->sinkID;
 	sinkOffset = route->sinkOffset;
 	channels = route->channels;
-	channel_route = route->channel_route;
 
 	/* Gather the source info */
 	srcID = str2stream(argv[1], true);
 	if (srcID == STREAM_ID_MAX)
 		return;
-	srcOffset = 0;
+
+	val = strtol(argv[2], &endptr, 10);
+	if (endptr == argv[2] || *endptr != '\0' || val < 0)
+		return;
+	srcOffset = (unsigned)val;
 
 	/* Gather the sink info */
-	sinkID = str2stream(argv[2], false);
+	sinkID = str2stream(argv[3], false);
 	if (sinkID == STREAM_ID_MAX)
 		return;
-	sinkOffset = 0;
+
+	val = strtol(argv[4], &endptr, 10);
+	if (endptr == argv[4] || *endptr != '\0' || val < 0)
+		return;
+	sinkOffset = (unsigned)val;
 
 	/* Get the number of channels */
-	val = strtol(argv[3], &endptr, 10);
-	if (endptr == argv[3] || *endptr != '\0')
+	val = strtol(argv[5], &endptr, 10);
+	if (endptr == argv[5] || *endptr != '\0' || val < 0)
 		return;
 	channels = (unsigned)val;
-
-	/* Get the channel routing value */
-
-	channel_route = route_setting;
 
 	clearStreamBuffer(route->sinkID, route->sinkOffset, route->channels);
 
@@ -99,5 +103,4 @@ void apply_playback_settings(char **argv)
 	route->sinkID = sinkID;
 	route->sinkOffset = sinkOffset;
 	route->channels = channels;
-	route->channel_route = channel_route;
 }
