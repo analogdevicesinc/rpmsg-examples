@@ -33,19 +33,6 @@
 #define syslog_print(...)
 #define syslog_printf(...)
 
-typedef enum _CHANNEL_ROUTE {
-	CHANNEL_ROUTE_DISABLE =
-		0, // channel 1 to 12 observe in the 1-12 DAC output
-	CHANNEL_ROUTE_ENABLE, // channel 4 to 16 observe in the 1-12 DAC output
-	CHANNEL_ROUTE_INVALID
-} CHANNEL_ROUTE;
-
-#ifdef ROUTE_ENABLE
-unsigned route_setting = CHANNEL_ROUTE_ENABLE;
-#else
-unsigned route_setting = CHANNEL_ROUTE_DISABLE;
-#endif
-
 extern struct icap_instance icap_sharc_alsa_playback;
 #ifdef ICAP_RECORD_EN
 extern struct icap_instance icap_sharc_alsa_record;
@@ -132,7 +119,11 @@ int main(int argc, char **argv)
 
 	extern void apply_playback_settings(char **argv);
 
-	const char *inputargs[] = { "00", "linux", "codec", "16", NULL };
+#ifndef 	ROUTE_ENABLE
+	const char *inputargs[] = { "00", "linux", "0", "codec", "0", "16", NULL };
+#else
+	const char *inputargs[] = { "00", "linux", "4", "codec", "0", "12", NULL };
+#endif	
 
 	apply_playback_settings((char **)inputargs);
 
