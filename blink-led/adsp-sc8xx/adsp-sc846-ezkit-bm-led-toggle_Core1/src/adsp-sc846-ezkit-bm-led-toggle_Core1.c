@@ -3,7 +3,7 @@
  *****************************************************************************/
 
 #include "adi_initialize.h"
-#include "adsp-sc5xx-bm-led-toggle_Core1.h"
+#include "adsp-sc846-ezkit-bm-led-toggle_Core1.h"
 
 #include <sys/platform.h>
 #include <sys/platform.h>
