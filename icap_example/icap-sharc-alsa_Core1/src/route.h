@@ -38,8 +38,6 @@ typedef struct _ROUTE_INFO {
 	unsigned srcOffset;
 	unsigned sinkOffset;
 	unsigned channels;
-	unsigned channel_route;
-
 } ROUTE_INFO;
 
 #endif
