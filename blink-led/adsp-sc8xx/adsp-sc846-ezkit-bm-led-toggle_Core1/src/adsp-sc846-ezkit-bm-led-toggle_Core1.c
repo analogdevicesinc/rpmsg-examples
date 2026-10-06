@@ -1,13 +1,20 @@
 /*****************************************************************************
- * adsp-sc846-ezkit-bm-led-toggle_Core1.c
+ * adsp-sc5xx-bm-led-toggle_Core1.c
  *****************************************************************************/
 
 #include "adi_initialize.h"
-#include "adsp-sc846-ezkit-bm-led-toggle_Core1.h"
+#include "adsp-sc5xx-bm-led-toggle_Core1.h"
 
+#include <sys/platform.h>
 #include <sys/platform.h>
 #include <services/gpio/adi_gpio.h>
 #include <cycle_count.h>
+
+/** 
+ * If you want to use command program arguments, then place them in the following string. 
+ */
+char __argv_string[] = "";
+
 
 #if defined (__ADSPSC846__)
 #define ADI_LED1_PORT ADI_GPIO_PORT_B
@@ -16,6 +23,13 @@
 #define ADI_LED1_PIN ADI_GPIO_PIN_4
 #define ADI_LED2_PIN ADI_GPIO_PIN_5
 #define ADI_LED3_PIN ADI_GPIO_PIN_6
+#elif defined (__ADSPSC598W__) || defined (__ADSPSC598__)
+#define ADI_LED1_PORT ADI_GPIO_PORT_C
+#define ADI_LED2_PORT ADI_GPIO_PORT_C
+#define ADI_LED3_PORT ADI_GPIO_PORT_C
+#define ADI_LED1_PIN ADI_GPIO_PIN_1
+#define ADI_LED2_PIN ADI_GPIO_PIN_2
+#define ADI_LED3_PIN ADI_GPIO_PIN_3
 #endif
 
 #define LED_BLINK_DELAY_TIME 1 // 1 SECOND
@@ -99,7 +113,7 @@ void turn_off_led(int led){
 }
 
 void my_delay() {
-	int i=10000000;
+	int i=100000000;
 	while (i>0) {
 		i--;
 	}
@@ -111,18 +125,22 @@ void test_leds(void){
 	turn_on_led(1);
 	turn_on_led(2);
 	my_delay();
+	//sleep(1);
 	turn_off_led(0);
 	turn_off_led(1);
 	turn_off_led(2);
 	my_delay();
+	//sleep(1);
 	turn_on_led(0);
 	turn_on_led(1);
 	turn_on_led(2);
 	my_delay();
+	//sleep(1);
 	turn_off_led(0);
 	turn_off_led(1);
 	turn_off_led(2);
 	my_delay();
+	//sleep(1);
 }
 
 int main()
