@@ -138,7 +138,6 @@ static void routeAudio(STREAM_INFO *streamInfo, unsigned numStreams,
 
 	int32_t *ip_ptr;
 	int32_t *out_ptr;
-	unsigned channel_route;
 	unsigned r;
 
 	for (r = 0; r < numRoutes; r++) {
@@ -158,13 +157,9 @@ static void routeAudio(STREAM_INFO *streamInfo, unsigned numStreams,
 		outChannel = route->sinkOffset;
 
 		channels = route->channels;
-		channel_route = route->channel_route;
 		in = (SYSTEM_AUDIO_TYPE *)src->data + inChannel;
 		int32_t *out32 = (int32_t *)sink->data + outChannel;
 		int16_t *out16 = (int16_t *)sink->data + outChannel;
-
-		ip_ptr = (int32_t *)src->data + inChannel;
-		out_ptr = (int32_t *)sink->data + outChannel;
 
 		for (frame = 0; frame < src->numFrames; frame++) {
 			for (channel = 0; channel < channels; channel++) {
@@ -185,30 +180,11 @@ static void routeAudio(STREAM_INFO *streamInfo, unsigned numStreams,
 			}
 			in += src->numChannels;
 			out32 += sink->numChannels;
-		}
-
-		/*
-		 * ROUTE_ENABLE: remap channels 4-16 from the source buffer
-		 * to DAC outputs 1-12; zero channels 13-16.
-		 */
-		if (channel_route == 1) {
-			for (int fr = 0; fr < (int)src->numFrames; fr++) {
-				for (int in_ch = 4, op_ch = 0;
-				     in_ch < (int)sink->numChannels;
-				     in_ch++, op_ch++) {
-					out_ptr[fr * sink->numChannels + op_ch] =
-						ip_ptr[fr * src->numChannels +
-						       in_ch];
-				}
-				for (int op_ch = 12;
-				     op_ch < (int)sink->numChannels; op_ch++) {
-					out_ptr[fr * sink->numChannels + op_ch] =
-						0;
-				}
-			}
+			out16 += sink->numChannels;
 		}
 
 #ifdef ICAP_RECORD_EN
+		out_ptr = (int32_t *)sink->data;
 		if (route->sinkID == STREAM_ID_CODEC_OUT &&
 		    icap_sharc_alsa_playback_buffer.in_use == 1) {
 			for (int i = 0; i < SYSTEM_BLOCK_SIZE; i++) {
