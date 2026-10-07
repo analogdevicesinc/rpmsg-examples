@@ -131,13 +131,10 @@ static void routeAudio(STREAM_INFO *streamInfo, unsigned numStreams,
 	STREAM_INFO *src, *sink;
 	unsigned channels;
 	SYSTEM_AUDIO_TYPE *in;
-	unsigned inChannel, outChannel;
 	unsigned frame;
 	unsigned channel;
 	SYSTEM_AUDIO_TYPE sample;
 
-	int32_t *ip_ptr;
-	int32_t *out_ptr;
 	unsigned channel_route;
 	unsigned r;
 
@@ -154,22 +151,18 @@ static void routeAudio(STREAM_INFO *streamInfo, unsigned numStreams,
 		if ((src->data == NULL) || (sink->data == NULL))
 			continue;
 
-		inChannel = route->srcOffset;
-		outChannel = route->sinkOffset;
-
 		channels = route->channels;
 		channel_route = route->channel_route;
-		in = (SYSTEM_AUDIO_TYPE *)src->data + inChannel;
-		int32_t *out32 = (int32_t *)sink->data + outChannel;
-		int16_t *out16 = (int16_t *)sink->data + outChannel;
+		in = (SYSTEM_AUDIO_TYPE *)src->data;
+		int32_t *out32 = (int32_t *)sink->data;
+		int16_t *out16 = (int16_t *)sink->data;
 
-		ip_ptr = (int32_t *)src->data + inChannel;
-		out_ptr = (int32_t *)sink->data + outChannel;
+		int32_t *out_ptr = (int32_t *)sink->data;
 
 		for (frame = 0; frame < src->numFrames; frame++) {
 			for (channel = 0; channel < channels; channel++) {
-				if ((outChannel + channel) < sink->numChannels) {
-					if ((inChannel + channel) <
+				if ((channel) < sink->numChannels) {
+					if ((channel) <
 					    src->numChannels) {
 						sample = *(in + channel);
 					} else {
@@ -188,8 +181,9 @@ static void routeAudio(STREAM_INFO *streamInfo, unsigned numStreams,
 		}
 
 		/*
-		 * ROUTE_ENABLE: remap channels 4-16 from the source buffer
-		 * to DAC outputs 1-12; zero channels 13-16.
+		 * ROUTE_ENABLE: source channels have already been copied into the
+		 * sink buffer above. Remap sink channels 4-16 in-place to DAC
+		 * outputs 1-12, then zero sink channels 13-16.
 		 */
 		if (channel_route == 1) {
 			for (int fr = 0; fr < (int)src->numFrames; fr++) {
@@ -197,7 +191,7 @@ static void routeAudio(STREAM_INFO *streamInfo, unsigned numStreams,
 				     in_ch < (int)sink->numChannels;
 				     in_ch++, op_ch++) {
 					out_ptr[fr * sink->numChannels + op_ch] =
-						ip_ptr[fr * src->numChannels +
+						out_ptr[fr * sink->numChannels +
 						       in_ch];
 				}
 				for (int op_ch = 12;
