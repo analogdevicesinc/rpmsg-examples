@@ -9,6 +9,7 @@
 #include <sys/platform.h>
 #include <services/gpio/adi_gpio.h>
 #include <cycle_count.h>
+#include <time.h>
 
 /** 
  * If you want to use command program arguments, then place them in the following string. 
@@ -38,26 +39,34 @@ int init_leds(void){
 
 	ADI_GPIO_RESULT ret;
 
-	ret = adi_gpio_PortInit(ADI_GPIO_PORT_C, ADI_LED1_PIN|ADI_LED1_PIN|ADI_LED1_PIN,
+	ret = adi_gpio_PortInit(ADI_LED1_PORT, ADI_LED1_PIN,
 		ADI_GPIO_DIRECTION_OUTPUT, false);
-	if(ret!= ADI_GPIO_SUCCESS){
+	if (ret != ADI_GPIO_SUCCESS)
 		return ret;
-	}
+
+	ret = adi_gpio_PortInit(ADI_LED2_PORT, ADI_LED2_PIN,
+		ADI_GPIO_DIRECTION_OUTPUT, false);
+	if (ret != ADI_GPIO_SUCCESS)
+		return ret;
+
+	ret = adi_gpio_PortInit(ADI_LED3_PORT, ADI_LED3_PIN,
+		ADI_GPIO_DIRECTION_OUTPUT, false);
+	if (ret != ADI_GPIO_SUCCESS)
+		return ret;
 
 	ret = adi_gpio_SetDirection(ADI_LED1_PORT, ADI_LED1_PIN, ADI_GPIO_DIRECTION_OUTPUT);
-	if(ret!= ADI_GPIO_SUCCESS){
+	if (ret != ADI_GPIO_SUCCESS)
 		return ret;
-	}
 
 	ret = adi_gpio_SetDirection(ADI_LED2_PORT, ADI_LED2_PIN, ADI_GPIO_DIRECTION_OUTPUT);
-	if(ret!= ADI_GPIO_SUCCESS){
+	if (ret != ADI_GPIO_SUCCESS){
 		return ret;
 	}
 
 	ret = adi_gpio_SetDirection(ADI_LED3_PORT, ADI_LED3_PIN, ADI_GPIO_DIRECTION_OUTPUT);
-	if(ret!= ADI_GPIO_SUCCESS){
+	if (ret != ADI_GPIO_SUCCESS)
 		return ret;
-	}
+
 	turn_off_led(0);
 	turn_off_led(1);
 	turn_off_led(2);
@@ -113,10 +122,25 @@ void turn_off_led(int led){
 }
 
 void my_delay() {
+#if defined (__ADSPSC846__)
+	//not supported
+	//sleep(LED_BLINK_DELAY_TIME);
 	volatile int i=100000000;
 	while (i>0) {
 		i--;
 	}
+
+#else
+	/* The SHARC+ run-time library has no sleep(): spin on the EMUCLK cycle counter */
+	unsigned int sec;
+
+	for (sec = 0; sec < LED_BLINK_DELAY_TIME; sec++) {
+		unsigned long start = (unsigned long)clock();
+
+	while ((unsigned long)clock() - start < (unsigned long)CLOCKS_PER_SEC)
+		;
+	}
+#endif
 }
 
 void test_leds(void){
