@@ -14,7 +14,7 @@
 CCES_DIR ?= /opt/analog/cces/3.1.0
 
 APP       := adsp-sc8xx-ezkit-bm-led-toggle_Core1
-TARGETS   := sc598 sc846
+TARGETS   := sc594 sc598 sc846
 BUILD_DIR := build
 
 SRCS := $(wildcard src/*.c) $(wildcard system/*.c)
@@ -29,6 +29,14 @@ PROC_sc598    := ADSP-SC598
 SIREV_sc598   ?= 0.0
 CFLAGS_sc598  := -si-revision $(SIREV_sc598) -O
 LDFLAGS_sc598 := -si-revision $(SIREV_sc598) -flags-link -MDCORE1,-MDOTHERCORE
+
+# ADSP-SC594 (SHARC+): the default LDF selects the core via CORE1/CORE2,
+# OTHERCORE leaves booting of the ARM core to someone else.
+CC_sc594      := $(CCES_DIR)/cc21k
+PROC_sc594    := ADSP-SC594
+SIREV_sc594   ?= 0.0
+CFLAGS_sc594  := -si-revision $(SIREV_sc594) -O
+LDFLAGS_sc594 := -si-revision $(SIREV_sc594) -flags-link -MDCORE1,-MDOTHERCORE
 
 # ADSP-SC846 (SHARC-FX): links against the default LSP.
 CC_sc846      := $(CCES_DIR)/ccfx

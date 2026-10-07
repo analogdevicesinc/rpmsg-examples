@@ -31,6 +31,13 @@ char __argv_string[] = "";
 #define ADI_LED1_PIN ADI_GPIO_PIN_1
 #define ADI_LED2_PIN ADI_GPIO_PIN_2
 #define ADI_LED3_PIN ADI_GPIO_PIN_3
+#elif defined (__ADSPSC594W__) || defined (__ADSPSC594__)
+#define ADI_LED1_PORT ADI_GPIO_PORT_C
+#define ADI_LED2_PORT ADI_GPIO_PORT_C
+#define ADI_LED3_PORT ADI_GPIO_PORT_C
+#define ADI_LED1_PIN ADI_GPIO_PIN_1
+#define ADI_LED2_PIN ADI_GPIO_PIN_2
+#define ADI_LED3_PIN ADI_GPIO_PIN_3
 #endif
 
 #define LED_BLINK_DELAY_TIME 1 // 1 SECOND
