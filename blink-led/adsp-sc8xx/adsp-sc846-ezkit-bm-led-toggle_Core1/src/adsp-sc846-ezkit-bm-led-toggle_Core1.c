@@ -38,7 +38,7 @@ int init_leds(void){
 
 	ADI_GPIO_RESULT ret;
 
-	ret = adi_gpio_PortInit(ADI_GPIO_PORT_B, ADI_LED1_PIN|ADI_LED1_PIN|ADI_LED1_PIN,
+	ret = adi_gpio_PortInit(ADI_GPIO_PORT_C, ADI_LED1_PIN|ADI_LED1_PIN|ADI_LED1_PIN,
 		ADI_GPIO_DIRECTION_OUTPUT, false);
 	if(ret!= ADI_GPIO_SUCCESS){
 		return ret;
@@ -113,7 +113,7 @@ void turn_off_led(int led){
 }
 
 void my_delay() {
-	int i=100000000;
+	volatile int i=100000000;
 	while (i>0) {
 		i--;
 	}
