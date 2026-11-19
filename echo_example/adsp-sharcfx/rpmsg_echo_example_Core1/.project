@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>rpmsg-echo-example_Core1</name>
+	<name>rpmsg_echo_example_Core1</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -36,4 +36,11 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 		<nature>com.analog.crosscore.managedbuilder.core.CCESProjectNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>rpmsg-lite</name>
+			<type>2</type>
+			<locationURI>PARENT-1-PROJECT_LOC/rpmsg-lite</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>

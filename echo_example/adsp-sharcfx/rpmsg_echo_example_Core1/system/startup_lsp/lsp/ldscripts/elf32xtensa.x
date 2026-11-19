@@ -1,4 +1,4 @@
-/* This linker script generated from xt-genldscripts.tpp for LSP C:\Users\AArtamon\work\bump_rpmsg_lite\rpmsg-examples\echo_example\adsp-sharfx\rpmsg-echo-example_Core1\system\startup_lsp\lsp */
+/* This linker script generated from xt-genldscripts.tpp for LSP C:\Users\AArtamon\work\bump_rpmsg_lite\rpmsg-examples\echo_example\adsp-sharcfx\rpmsg_echo_example_Core1\system\startup_lsp\lsp */
 /* Linker Script for default link */
 MEMORY
 {

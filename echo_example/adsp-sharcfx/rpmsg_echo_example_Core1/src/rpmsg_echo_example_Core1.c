@@ -1,9 +1,9 @@
 /*****************************************************************************
- * rpmsg-echo-example_Core1.c
+ * rpmsg_echo_example_Core1.c
  *****************************************************************************/
 
 #include "adi_initialize.h"
-#include "rpmsg-echo-example_Core1.h"
+#include "rpmsg_echo_example_Core1.h"
 
 #include <sys/platform.h>
 
