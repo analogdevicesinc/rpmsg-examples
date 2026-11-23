@@ -97,7 +97,9 @@ int main()
 	adi_initComponents();
 	
 	/* Begin adding your custom code here */
-	while(1) {};
+	while(1) {
+		XT_WAITI(0);
+	}
 
 	return 0;
 }
