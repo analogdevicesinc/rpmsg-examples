@@ -15,7 +15,8 @@ const struct xthal_MPU_entry
 __xt_mpu_init_table[] __attribute__((section(".ResetHandler.text"))) = {
   XTHAL_MPU_ENTRY(0x00000000, 1, XTHAL_AR_NONE, XTHAL_MEM_DEVICE), // guard_zero
   XTHAL_MPU_ENTRY(0x20200000, 1, XTHAL_AR_RX, XTHAL_MEM_WRITEBACK_NOALLOC | XTHAL_MEM_NON_SHAREABLE), // L2_boot_code_0
-  XTHAL_MPU_ENTRY(0x20400000, 1, XTHAL_AR_R, XTHAL_MEM_NON_CACHEABLE | XTHAL_MEM_BUFFERABLE | XTHAL_MEM_SYSTEM_SHAREABLE), // L2_ram_arm0_uc
+  XTHAL_MPU_ENTRY(0x20400000, 1, XTHAL_AR_RW, XTHAL_MEM_NON_CACHEABLE | XTHAL_MEM_BUFFERABLE | XTHAL_MEM_SYSTEM_SHAREABLE), // L2_ipc_vrings
+  XTHAL_MPU_ENTRY(0x20430000, 1, XTHAL_AR_R, XTHAL_MEM_NON_CACHEABLE | XTHAL_MEM_BUFFERABLE | XTHAL_MEM_SYSTEM_SHAREABLE), // L2_ram_arm0_arm1
   XTHAL_MPU_ENTRY(0x20500000, 1, XTHAL_AR_RWX, XTHAL_MEM_WRITEBACK | XTHAL_MEM_NON_SHAREABLE), // L2_ram_fx
   XTHAL_MPU_ENTRY(0x24000000, 1, XTHAL_AR_RW, XTHAL_MEM_DEVICE), // OTP_data
   XTHAL_MPU_ENTRY(0x28240000, 1, XTHAL_AR_RW, XTHAL_MEM_NON_CACHEABLE | XTHAL_MEM_BUFFERABLE | XTHAL_MEM_SYSTEM_SHAREABLE), // L1_data_mp
@@ -25,13 +26,13 @@ __xt_mpu_init_table[] __attribute__((section(".ResetHandler.text"))) = {
   XTHAL_MPU_ENTRY(0x30000000, 1, XTHAL_AR_RW, XTHAL_MEM_DEVICE), // System_mmr
   XTHAL_MPU_ENTRY(0x50000000, 1, XTHAL_AR_RWX, XTHAL_MEM_WRITETHRU_WRITEALLOC | XTHAL_MEM_NON_SHAREABLE), // xSPI1_data
   XTHAL_MPU_ENTRY(0x80000000, 1, XTHAL_AR_RWX, XTHAL_MEM_WRITEBACK | XTHAL_MEM_NON_SHAREABLE), // L3_ram_fx
-  XTHAL_MPU_ENTRY(0x90000000, 1, XTHAL_AR_R, XTHAL_MEM_NON_CACHEABLE | XTHAL_MEM_BUFFERABLE | XTHAL_MEM_SYSTEM_SHAREABLE), // L3_ram_arm0
+  XTHAL_MPU_ENTRY(0xa0000000, 1, XTHAL_AR_R, XTHAL_MEM_NON_CACHEABLE | XTHAL_MEM_BUFFERABLE | XTHAL_MEM_SYSTEM_SHAREABLE), // L3_ram_arm0
 };
 
 #if defined (__cplusplus)
 extern "C"
 #endif
-const uint32_t __xt_mpu_init_table_size __attribute__((section(".ResetHandler.text"))) = 13;
+const uint32_t __xt_mpu_init_table_size __attribute__((section(".ResetHandler.text"))) = 14;
 
 #if defined (__cplusplus)
 extern "C"
@@ -39,5 +40,5 @@ extern "C"
 const uint32_t __xt_mpu_init_cacheadrdis __attribute__((section(".ResetHandler.text"))) = 0x000000e1;
 
 #if defined (__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
-static_assert(sizeof(__xt_mpu_init_table)/sizeof(__xt_mpu_init_table[0]) == 13, "Incorrect MPU table size");
+static_assert(sizeof(__xt_mpu_init_table)/sizeof(__xt_mpu_init_table[0]) == 14, "Incorrect MPU table size");
 #endif

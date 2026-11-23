@@ -1,6 +1,6 @@
 // Customer ID=9849; Build=0x79363; Copyright (c) 2006-2015 Cadence Design Systems, Inc.
 // Portions Copyright (C) 2026 Analog Devices, Inc.
-// memmap.xmm source file generated on November 19, 2026 at 14:14:19.
+// memmap.xmm source file generated on November 20, 2026 at 13:21:37.
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -90,8 +90,10 @@ PLACE SECTIONS(__llvm_prf_names) WITH_SECTION(.data)
 
 BEGIN L2_sram
 0x20400000: sysram : L2_sram : 0x400000 : executable, writable ;
- L2_ram_arm0_uc : C : 0x20400000 - 0x2040ffff :;  AR=R MT=NC,SS,BUF ;
- L2_ram_shared_uc : C : 0x20410000 - 0x2042ffff :;  AR=R MT=NC,SS,BUF ;
+ L2_ipc_vrings : C : 0x20400000 - 0x20403fff :;  AR=RW MT=NC,SS,BUF ;
+ L2_ipc_rsc : C : 0x20404000 - 0x204043ff : .adi_rsc_hdr .resource_table;  AR=RW MT=NC,SS,BUF ;
+ L2_ram_arm0_uc : C : 0x20404400 - 0x2040ffff :;  AR=RW MT=NC,SS,BUF ;
+ L2_ipc_buffers : C : 0x20410000 - 0x2042ffff :;  AR=RW MT=NC,SS,BUF ;
  L2_ram_arm0_arm1 : C : 0x20430000 - 0x204fffff :;  AR=R MT=NC,SS,BUF ;
  L2_ram_fx : C : 0x20500000 - 0x207fdfff : .icc.data .L2.rodata .rodata .L2.literal .literal .L2.text .text .L2.data .data .L2.noload .noload .L2.bss .bss;  AR=RWX MT=WB,NS ;
  L2_boot_noload : C : 0x207fe000 - 0x207fffff : .L2_boot.noload;  AR=RWX MT=WB,NS ;
@@ -147,9 +149,9 @@ END SPI
 
 BEGIN L3_sdram
 0x80000000: sysram : L3_sdram : 0x40000000 : executable, writable ;
- L3_ram_fx : C : 0x80000000 - 0x8fffffff : .L3.rodata .L3.literal .L3.text .L3.data .L3.noload .L3.bss;  AR=RWX MT=WB,NS ;
- L3_ram_arm0 : C : 0x90000000 - 0x97ffffff :;  AR=R MT=NC,SS,BUF ;
- L3_ram_arm1 : C : 0x98000000 - 0x9fffffff :;  AR=R MT=NC,SS,BUF ;
+ L3_ram_fx : C : 0x80000000 - 0x9fffffff : .L3.rodata .L3.literal .L3.text .L3.data .L3.noload .L3.bss;  AR=RWX MT=WB,NS ;
+ L3_ram_arm0 : C : 0xa0000000 - 0xafffffff :;  AR=R MT=NC,SS,BUF ;
+ L3_ram_arm1 : C : 0xb0000000 - 0xbfffffff :;  AR=R MT=NC,SS,BUF ;
 END L3_sdram
 
 NOLOAD .noload .L1.noload .L2.noload .L2_boot.noload .L3.noload

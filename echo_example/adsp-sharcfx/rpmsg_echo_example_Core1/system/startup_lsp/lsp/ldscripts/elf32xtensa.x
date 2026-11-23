@@ -2,11 +2,12 @@
 /* Linker Script for default link */
 MEMORY
 {
+  L2_ipc_rsc_seg :                    	org = 0x20404000, len = 0x400
   L2_ram_fx_seg :                     	org = 0x20500000, len = 0x2FE000
   L2_boot_noload_seg :                	org = 0x207FE000, len = 0x2000
   L1_data_seg :                       	org = 0x2F780000, len = 0x80000
   L1_code_seg :                       	org = 0x2F800000, len = 0x10000
-  L3_ram_fx_seg :                     	org = 0x80000000, len = 0x10000000
+  L3_ram_fx_seg :                     	org = 0x80000000, len = 0x20000000
 }
 
 PHDRS
@@ -15,8 +16,10 @@ PHDRS
   L2_boot_code_1_sharc_phdr PT_LOAD;
   L2_boot_code_1_arm_phdr PT_LOAD;
   L2_boot_code_2_phdr PT_LOAD;
+  L2_ipc_vrings_phdr PT_LOAD;
+  L2_ipc_rsc_phdr PT_LOAD;
   L2_ram_arm0_uc_phdr PT_LOAD;
-  L2_ram_shared_uc_phdr PT_LOAD;
+  L2_ipc_buffers_phdr PT_LOAD;
   L2_ram_arm0_arm1_phdr PT_LOAD;
   L2_ram_fx_phdr PT_LOAD;
   L2_ram_fx_bss_phdr PT_LOAD;
@@ -66,6 +69,8 @@ _memmap_mem_L3_sdram_start = 0x80000000;
 _memmap_mem_L3_sdram_end   = 0xc0000000;
 
 /*  Memory segment boundary addresses:  */
+_memmap_seg_L2_ipc_rsc_start = 0x20404000;
+_memmap_seg_L2_ipc_rsc_max   = 0x20404400;
 _memmap_seg_L2_ram_fx_start = 0x20500000;
 _memmap_seg_L2_ram_fx_max   = 0x207fe000;
 _memmap_seg_L2_boot_noload_start = 0x207fe000;
@@ -75,7 +80,7 @@ _memmap_seg_L1_data_max   = 0x2f800000;
 _memmap_seg_L1_code_start = 0x2f800000;
 _memmap_seg_L1_code_max   = 0x2f810000;
 _memmap_seg_L3_ram_fx_start = 0x80000000;
-_memmap_seg_L3_ram_fx_max   = 0x90000000;
+_memmap_seg_L3_ram_fx_max   = 0xa0000000;
 
 _rom_store_table = 0;
 PROVIDE(_memmap_vecbase_reset = 0x2f800000);
@@ -105,6 +110,25 @@ SECTIONS
 
 
   _memmap_mem_L2_boot_rom_max = ABSOLUTE(.);
+
+
+  .adi_rsc_hdr : ALIGN(4)
+  {
+    _adi_rsc_hdr_start = ABSOLUTE(.);
+    *(.adi_rsc_hdr)
+    . = ALIGN (4);
+    _adi_rsc_hdr_end = ABSOLUTE(.);
+  } >L2_ipc_rsc_seg :L2_ipc_rsc_phdr
+
+  .resource_table : ALIGN(4)
+  {
+    _resource_table_start = ABSOLUTE(.);
+    *(.resource_table)
+    . = ALIGN (4);
+    _resource_table_end = ABSOLUTE(.);
+    _memmap_seg_L2_ipc_rsc_end = ALIGN(0x8);
+  } >L2_ipc_rsc_seg :L2_ipc_rsc_phdr
+
 
 
 

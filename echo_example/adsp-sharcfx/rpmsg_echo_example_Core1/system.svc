@@ -8,6 +8,18 @@ A Linker Support Package defines the target memory map and the placement of prog
 It provides information needed to link your code. It can be used to configure memory-related options, such as the placement of the system heap, system stack, and memory segments.]]></component-description>
 			<product name="Startup Code/LSP" version="1.0.0"/>
 		</component>
+		<component id="com.analog.crosscore.addins.ssldd.pwr.common.sharcfx" name="PWR Service for SHARC-FX" version="1.0.0" visible="false">
+			<component-description><![CDATA[This add-in provides Analog Devices' implementation of the Power (PWR) Service.]]></component-description>
+			<product name="Analog Devices System Services and Device Drivers" version="1.0.0"/>
+		</component>
+		<component id="com.analog.crosscore.addins.ssldd.pwr.sc8xx.sharcfx" name="PWR Service for SHARC-FX" version="2.0.0" visible="true">
+			<component-description><![CDATA[This add-in provides Analog Devices' implementation of the Power (PWR) Service.]]></component-description>
+			<product name="Analog Devices System Services and Device Drivers" version="1.0.0"/>
+		</component>
+		<component id="com.analog.crosscore.addins.ssldd.wd.sharcfx" name="WDT Service for SHARC-FX" version="1.0.0" visible="true">
+			<component-description><![CDATA[This add-in provides Analog Devices' implementation of the Watchdog Timer (WDT) Service.]]></component-description>
+			<product name="Analog Devices System Services and Device Drivers" version="1.0.0"/>
+		</component>
 	</installedComponents>
 	<configurations>
 		<configuration id="com.analog.crosscore.addins.lsp.component.startup_lsp">
@@ -133,11 +145,11 @@ It provides information needed to link your code. It can be used to configure me
 					</default-placed-sections>
 					<memory-segments>
 						<memory-segment>
-							<name>L2_ram_arm0_uc</name>
+							<name>L2_ipc_vrings</name>
 							<start-address>0x20400000</start-address>
-							<end-address>0x2040ffff</end-address>
+							<end-address>0x20403fff</end-address>
 							<location>L2_sram</location>
-							<access-kernel-mode>R</access-kernel-mode>
+							<access-kernel-mode>RW</access-kernel-mode>
 							<access-user-mode/>
 							<caching-properties>NC</caching-properties>
 							<sharing>SS</sharing>
@@ -146,11 +158,40 @@ It provides information needed to link your code. It can be used to configure me
 							<memory-sections/>
 						</memory-segment>
 						<memory-segment>
-							<name>L2_ram_shared_uc</name>
+							<name>L2_ipc_rsc</name>
+							<start-address>0x20404000</start-address>
+							<end-address>0x204043ff</end-address>
+							<location>L2_sram</location>
+							<access-kernel-mode>RW</access-kernel-mode>
+							<access-user-mode/>
+							<caching-properties>NC</caching-properties>
+							<sharing>SS</sharing>
+							<interruptible>1</interruptible>
+							<bufferable>1</bufferable>
+							<memory-sections>
+								<memory-section>.adi_rsc_hdr</memory-section>
+								<memory-section>.resource_table</memory-section>
+							</memory-sections>
+						</memory-segment>
+						<memory-segment>
+							<name>L2_ram_arm0_uc</name>
+							<start-address>0x20404400</start-address>
+							<end-address>0x2040ffff</end-address>
+							<location>L2_sram</location>
+							<access-kernel-mode>RW</access-kernel-mode>
+							<access-user-mode/>
+							<caching-properties>NC</caching-properties>
+							<sharing>SS</sharing>
+							<interruptible>1</interruptible>
+							<bufferable>1</bufferable>
+							<memory-sections/>
+						</memory-segment>
+						<memory-segment>
+							<name>L2_ipc_buffers</name>
 							<start-address>0x20410000</start-address>
 							<end-address>0x2042ffff</end-address>
 							<location>L2_sram</location>
-							<access-kernel-mode>R</access-kernel-mode>
+							<access-kernel-mode>RW</access-kernel-mode>
 							<access-user-mode/>
 							<caching-properties>NC</caching-properties>
 							<sharing>SS</sharing>
@@ -386,7 +427,7 @@ It provides information needed to link your code. It can be used to configure me
 						<memory-segment>
 							<name>L3_ram_fx</name>
 							<start-address>0x80000000</start-address>
-							<end-address>0x8fffffff</end-address>
+							<end-address>0x9fffffff</end-address>
 							<location>L3_sdram</location>
 							<access-kernel-mode>RWX</access-kernel-mode>
 							<access-user-mode/>
@@ -405,8 +446,8 @@ It provides information needed to link your code. It can be used to configure me
 						</memory-segment>
 						<memory-segment>
 							<name>L3_ram_arm0</name>
-							<start-address>0x90000000</start-address>
-							<end-address>0x97ffffff</end-address>
+							<start-address>0xa0000000</start-address>
+							<end-address>0xafffffff</end-address>
 							<location>L3_sdram</location>
 							<access-kernel-mode>R</access-kernel-mode>
 							<access-user-mode/>
@@ -418,8 +459,8 @@ It provides information needed to link your code. It can be used to configure me
 						</memory-segment>
 						<memory-segment>
 							<name>L3_ram_arm1</name>
-							<start-address>0x98000000</start-address>
-							<end-address>0x9fffffff</end-address>
+							<start-address>0xb0000000</start-address>
+							<end-address>0xbfffffff</end-address>
 							<location>L3_sdram</location>
 							<access-kernel-mode>R</access-kernel-mode>
 							<access-user-mode/>
