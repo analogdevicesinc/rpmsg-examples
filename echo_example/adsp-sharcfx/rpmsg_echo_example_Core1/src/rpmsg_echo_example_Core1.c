@@ -134,7 +134,6 @@ volatile struct _rpmsg_msg rpmsg_msg_queue[MAX_RPMSG_COUNT];
 volatile sm_atomic_t rpmsg_msg_queue_head = 0;
 volatile sm_atomic_t rpmsg_msg_queue_tail = 0;
 
-
 int rsc_tbl_ready(void) {
 	/* 0x1 acknowledge, 0x2 driver found, 0x4 driver ready*/
 	return resource_table->rpmsg_vdev.status == 7;
@@ -261,6 +260,67 @@ int32_t echo_cap_call_back(void *payload, uint32_t payload_len, uint32_t src, vo
 }
 
 /*
+ * This function is called from the idle loop, processes message received in echo_cap_call_back.
+ * After message is processed the message buffer is released using rpmsg_lite_release_rx_buffer().
+ */
+int handle_echo_cap_messages(void){
+	struct rpmsg_ep_info *_rpmsg_ep_info;
+	sm_atomic_t tail_next;
+	char* payload;
+	uint32_t payload_len;
+	uint32_t src;
+	char append_msg[64];
+	int32_t ret, i;
+
+	//queue empty do nothing
+	if(rpmsg_msg_queue_tail == rpmsg_msg_queue_head){
+		return 0;
+	}
+
+	//Get a message from the queue
+	tail_next = rpmsg_msg_queue_tail + 1;
+	if(tail_next >= MAX_RPMSG_COUNT){
+		tail_next = 0;
+	}
+	payload = (char*)rpmsg_msg_queue[tail_next].payload;
+	payload_len = rpmsg_msg_queue[tail_next].payload_len;
+	src = rpmsg_msg_queue[tail_next].src;
+	_rpmsg_ep_info = rpmsg_msg_queue[tail_next].priv;
+
+	// Process the message - capitalize letters
+	for(i = 0; i < payload_len; i++){
+		if('a' <= payload[i] && payload[i] <= 'z'){
+			payload[i] = payload[i] - ('a' - 'A');
+		}
+	}
+
+	// put in string ending for strcat_s
+	if (payload_len < RL_BUFFER_PAYLOAD_SIZE)
+		payload[payload_len] = '\0';
+
+	// Attach sharc core info to the response
+	snprintf(append_msg, sizeof(append_msg), " => capitalized echo from Core%d\n", adi_core_id());
+	strcat_s(payload, RL_BUFFER_PAYLOAD_SIZE, append_msg);
+
+	// Send modified message back to its origin endpoint
+	ret = rpmsg_lite_send(
+		_rpmsg_ep_info->rpmsg_instance,
+		_rpmsg_ep_info->rpmsg_ept,
+		src,
+		payload,
+		strlen(payload),
+		100);
+	if (ret < 0){
+		//handle error
+	}
+
+	// Release the rpmsg buffer
+	rpmsg_lite_release_rx_buffer(_rpmsg_ep_info->rpmsg_instance, rpmsg_msg_queue[tail_next].payload);
+	rpmsg_msg_queue_tail = tail_next;
+	return 1;
+}
+
+/*
  * Create seccond endpoint on the rpmsg channel and announce its existence.
  * Callback for this endpoint capitalizes letters in idle loop.
  * Core id is added to ECHO_EP_ADDRESS so the address is different for each core.
@@ -321,7 +381,7 @@ int main()
 
 	/* Begin adding your custom code here */
 	while(1) {
-		XT_WAITI(0);
+		handle_echo_cap_messages();
 	}
 
 	// Close notify system we are about to close endpoints.
