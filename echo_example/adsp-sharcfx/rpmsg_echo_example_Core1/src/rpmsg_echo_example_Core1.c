@@ -130,6 +130,11 @@ struct _rpmsg_msg{
 	void *priv;
 };
 
+volatile struct _rpmsg_msg rpmsg_msg_queue[MAX_RPMSG_COUNT];
+volatile sm_atomic_t rpmsg_msg_queue_head = 0;
+volatile sm_atomic_t rpmsg_msg_queue_tail = 0;
+
+
 int rsc_tbl_ready(void) {
 	/* 0x1 acknowledge, 0x2 driver found, 0x4 driver ready*/
 	return resource_table->rpmsg_vdev.status == 7;
@@ -163,6 +168,129 @@ int rpmsg_init_channel_to_ARM(void){
 	return 0;
 }
 
+/*
+ * Rpmsg callback function wich can be assigned to multiple endpoints.
+ * It executes in interrupt context.
+ */
+int32_t echo_call_back(void *payload, uint32_t payload_len, uint32_t src, void *priv){
+	struct rpmsg_ep_info *_rpmsg_ep_info = (struct rpmsg_ep_info *)priv;
+	char* data=payload;
+	char append_msg[32];
+	int32_t ret;
+
+	// put in string ending for strcat_s
+	if (payload_len < RL_BUFFER_PAYLOAD_SIZE)
+		data[payload_len] = '\0';
+
+	// Attach sharc core info to the response
+	snprintf(append_msg, sizeof(append_msg), " => echo from Core%d\n", adi_core_id());
+	strcat_s(payload, RL_BUFFER_PAYLOAD_SIZE, append_msg);
+
+	// Send the message back to its origin endpoint
+	ret = rpmsg_lite_send(
+		_rpmsg_ep_info->rpmsg_instance,
+		_rpmsg_ep_info->rpmsg_ept,
+		src,
+		payload,
+		strlen(payload),
+		100);
+	if (ret < 0){
+		//handle error
+	}
+	return RL_SUCCESS;
+}
+
+/*
+ * Create first endpoint on the rpmsg channel and announce its existence.
+ * Core id is added to ECHO_EP_ADDRESS so the address is different for each core.
+ */
+int rpmsg_init_echo_endpoint_to_ARM(int channel){
+	struct rpmsg_lite_endpoint *rpmsg_ept;
+	int ret;
+
+	rpmsg_ept = rpmsg_lite_create_ept(
+			&rpmsg_ARM_channel,
+			ECHO_EP_ADDRESS + adi_core_id()*EP_CORE1_OFFSET + channel,
+			&echo_call_back,
+			(void*)&rpmsg_echo_ep_to_ARM[channel],
+			&sharc_ARM_echo_endpoint_context[channel]);
+	if(rpmsg_ept == RL_NULL){
+		return -1;
+	}
+
+	ret = rpmsg_ns_announce(
+			&rpmsg_ARM_channel,
+			rpmsg_ept,
+			"sharc-echo",
+			RL_NS_CREATE);
+	if(ret != RL_SUCCESS){
+		return -1;
+	}
+	return 0;
+}
+
+/*
+ * Rpmsg callbacks execute in interrupt context.
+ * This rpmsg callback function returns RL_HOLD to tell rpmsg-lite
+ * to hold message buffer for later processing, zero-copy feature.
+ * The message can be put into queue for processing in idle loop instead of interrupt.
+ *
+ * After the message is processed in needs to be returned to the pool using:
+ * rpmsg_lite_release_rx_buffer()
+ */
+int32_t echo_cap_call_back(void *payload, uint32_t payload_len, uint32_t src, void *priv){
+	sm_atomic_t head_next = rpmsg_msg_queue_head + 1;
+	if (head_next >= MAX_RPMSG_COUNT){
+		head_next = 0;
+	}
+
+	// Check if queue is full
+	if(head_next == rpmsg_msg_queue_tail){
+		return RL_ERR_NO_BUFF; //drop the message
+	}
+
+	// put the message to the queue
+	rpmsg_msg_queue[head_next].payload = payload;
+	rpmsg_msg_queue[head_next].payload_len = payload_len;
+	rpmsg_msg_queue[head_next].src = src;
+	rpmsg_msg_queue[head_next].priv = priv;
+	rpmsg_msg_queue_head = head_next;
+
+	// Holds the buffer for later process, zero copy.
+	return RL_HOLD;
+}
+
+/*
+ * Create seccond endpoint on the rpmsg channel and announce its existence.
+ * Callback for this endpoint capitalizes letters in idle loop.
+ * Core id is added to ECHO_EP_ADDRESS so the address is different for each core.
+ */
+int rpmsg_init_echo_cap_endpoint_to_ARM(int channel){
+	struct rpmsg_lite_endpoint *rpmsg_ept;
+	int ret;
+
+	rpmsg_ept = rpmsg_lite_create_ept(
+			&rpmsg_ARM_channel,
+			ECHO_CAP_EP_ADDRESS + adi_core_id()*EP_CORE1_OFFSET+channel,
+			&echo_cap_call_back,
+			(void*)&rpmsg_echo_cap_ep_to_ARM[channel],
+			&sharc_ARM_echo_cap_endpoint_context[channel]);
+	if(rpmsg_ept == RL_NULL){
+		return -1;
+	}
+
+	ret = rpmsg_ns_announce(
+			&rpmsg_ARM_channel,
+			rpmsg_ept,
+			"sharc-echo-cap",
+			RL_NS_CREATE);
+	if(ret != RL_SUCCESS){
+		return -1;
+	}
+	return 0;
+}
+
+
 int main()
 {
 	int run=1;
@@ -179,7 +307,7 @@ int main()
 		rpmsg_echo_ep_to_ARM[i].rpmsg_instance = &rpmsg_ARM_channel;
 		rpmsg_echo_ep_to_ARM[i].rpmsg_ept = &sharc_ARM_echo_endpoint_context[i].ept;
 	}
-	for (i=0;i<EP_CORE1_OFFSET;i++)  {
+	for (i=0;i<EP_NUM_PER_CHAN;i++)  {
 		rpmsg_echo_cap_ep_to_ARM[i].rpmsg_instance = &rpmsg_ARM_channel;
 		rpmsg_echo_cap_ep_to_ARM[i].rpmsg_ept = &sharc_ARM_echo_cap_endpoint_context[i].ept;
 	}
@@ -187,13 +315,35 @@ int main()
 	// Initialize rpmsg channel to the ARM core and create two endpoints
 	rpmsg_init_channel_to_ARM();
 	for (i=0;i<EP_NUM_PER_CHAN;i++) {
-		//rpmsg_init_echo_endpoint_to_ARM(i);
-		//rpmsg_init_echo_cap_endpoint_to_ARM(i);
+		rpmsg_init_echo_endpoint_to_ARM(i);
+		rpmsg_init_echo_cap_endpoint_to_ARM(i);
 	}
 
 	/* Begin adding your custom code here */
 	while(1) {
 		XT_WAITI(0);
+	}
+
+	// Close notify system we are about to close endpoints.
+	for (i=0;i<EP_NUM_PER_CHAN;i++) {
+		rpmsg_ns_announce(
+				rpmsg_echo_ep_to_ARM[i].rpmsg_instance,
+				rpmsg_echo_ep_to_ARM[i].rpmsg_ept,
+				"sharc-echo",
+				RL_NS_DESTROY);
+
+		rpmsg_ns_announce(
+				rpmsg_echo_ep_to_ARM[i].rpmsg_instance,
+				rpmsg_echo_cap_ep_to_ARM[i].rpmsg_ept,
+				"sharc-echo-cap",
+				RL_NS_DESTROY);
+	}
+
+	// Close endpoints and the rpmsg channel
+	for (i=0;i<EP_NUM_PER_CHAN;i++) {
+		rpmsg_lite_destroy_ept(rpmsg_echo_ep_to_ARM[i].rpmsg_instance, rpmsg_echo_ep_to_ARM[i].rpmsg_ept);
+		//rpmsg_lite_destroy_ept(rpmsg_echo_cap_ep_to_ARM[i].rpmsg_instance, rpmsg_echo_cap_ep_to_ARM[i].rpmsg_ept);
+		rpmsg_lite_deinit(&rpmsg_ARM_channel);
 	}
 
 	return 0;
