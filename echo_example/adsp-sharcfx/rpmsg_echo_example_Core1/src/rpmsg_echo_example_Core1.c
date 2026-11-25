@@ -81,7 +81,7 @@ struct sharcfx_resource_table rsc_table
 				.da = RSC_VRING0_ADDR,
 				.align = VRING_ALIGN,
 				.num = RSC_VRING_NUM,
-				.notifyid = 0,
+				.notifyid = 1,
 			},
 			{
 				.da = RSC_VRING1_ADDR,
@@ -91,6 +91,9 @@ struct sharcfx_resource_table rsc_table
 			},
 		},
 };
+
+volatile struct sharcfx_resource_table *resource_table =
+        (volatile struct sharcfx_resource_table *)&rsc_table;
 
 /*
  * Rpmsg endpoints addresses.
@@ -106,6 +109,79 @@ struct rpmsg_lite_instance rpmsg_ARM_channel;
 struct rpmsg_lite_ept_static_context sharc_ARM_echo_endpoint_context[EP_NUM_PER_CHAN];
 struct rpmsg_lite_ept_static_context sharc_ARM_echo_cap_endpoint_context[EP_NUM_PER_CHAN];
 
+struct rpmsg_ep_info{
+	struct rpmsg_lite_instance *rpmsg_instance;
+	struct rpmsg_lite_endpoint *rpmsg_ept;
+};
+
+struct rpmsg_ep_info rpmsg_echo_ep_to_ARM[EP_NUM_PER_CHAN];
+struct rpmsg_ep_info rpmsg_echo_cap_ep_to_ARM[EP_NUM_PER_CHAN];
+
+/*
+ * Local rpmsg queue to offload message handling in main loop instead in interrupt.
+ * The queue uses rpmsg-lite zero copy feature.
+ */
+#define MAX_RPMSG_COUNT 16
+typedef uint16_t sm_atomic_t;
+struct _rpmsg_msg{
+	uint8_t *payload;
+	uint32_t payload_len;
+	uint32_t src;
+	void *priv;
+};
+
+void init_rsc_tbl(void) {
+
+	
+
+	//adi_resource_table = &___MCAPI_common_start;
+	//resource_table = &___MCAPI_common_start.tbl;
+
+	/* Don't initialize if remoteproc driver has already */
+	/*if(strcmp((const char *)adi_resource_table->tag, (const char *)rsc_tbl_local.tag)){
+		*adi_resource_table = rsc_tbl_local;
+
+		adi_resource_table->tbl.rpmsg_vdev.notifyid = 1;
+		adi_resource_table->tbl.vring[0].notifyid = 1;
+		adi_resource_table->tbl.vring[1].notifyid = 1;
+
+	}*/
+}
+
+int rsc_tbl_ready(void) {
+	/* 0x1 acknowledge, 0x2 driver found, 0x4 driver ready*/
+	return resource_table->rpmsg_vdev.status == 7;
+}
+
+/*
+ * Initialize rpmsg channel to ARM core
+ */
+int rpmsg_init_channel_to_ARM(void){
+	struct rpmsg_lite_instance *rpmsg_instance;
+
+	init_rsc_tbl();
+	while(!rsc_tbl_ready()){
+		/* Wait for resource table to be initialized by ARM*/
+	}
+
+	rpmsg_instance = rpmsg_lite_remote_init(
+			(void*)&resource_table->rpmsg_vdev, RL_PLATFORM_SHARC_ARM_LINK_ID,
+			RL_SHM_VDEV, &rpmsg_ARM_channel);
+
+	if(rpmsg_instance == RL_NULL){
+		return -1;
+	}
+
+	adi_rsc_hdr.initialized = ADI_RESOURCE_TABLE_INIT_MAGIC;
+
+	/*
+	 * Wait until ARM notifies the channel is up.
+	 */
+	while(!rpmsg_lite_is_link_up(rpmsg_instance));
+
+	return 0;
+}
+
 int main()
 {
 	int run=1;
@@ -116,6 +192,23 @@ int main()
 	
 	(void)adi_rsc_hdr.initialized;
 	(void)((volatile struct sharcfx_resource_table *)&rsc_table)->rpmsg_vdev.status;
+
+	//Initialise endpoints
+	for (i=0;i<EP_NUM_PER_CHAN;i++)  {
+		rpmsg_echo_ep_to_ARM[i].rpmsg_instance = &rpmsg_ARM_channel;
+		rpmsg_echo_ep_to_ARM[i].rpmsg_ept = &sharc_ARM_echo_endpoint_context[i].ept;
+	}
+	for (i=0;i<EP_CORE1_OFFSET;i++)  {
+		rpmsg_echo_cap_ep_to_ARM[i].rpmsg_instance = &rpmsg_ARM_channel;
+		rpmsg_echo_cap_ep_to_ARM[i].rpmsg_ept = &sharc_ARM_echo_endpoint_context[i].ept;
+	}
+
+	// Initialize rpmsg channel to the ARM core and create two endpoints
+	rpmsg_init_channel_to_ARM();
+	for (i=0;i<EP_NUM_PER_CHAN;i++) {
+		//rpmsg_init_echo_endpoint_to_ARM(i);
+		//rpmsg_init_echo_cap_endpoint_to_ARM(i);
+	}
 
 	/* Begin adding your custom code here */
 	while(1) {
