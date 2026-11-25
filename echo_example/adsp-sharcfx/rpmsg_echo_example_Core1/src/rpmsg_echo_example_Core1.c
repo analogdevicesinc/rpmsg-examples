@@ -81,7 +81,7 @@ struct sharcfx_resource_table rsc_table
 				.da = RSC_VRING0_ADDR,
 				.align = VRING_ALIGN,
 				.num = RSC_VRING_NUM,
-				.notifyid = 1,
+				.notifyid = 0,
 			},
 			{
 				.da = RSC_VRING1_ADDR,
@@ -130,24 +130,6 @@ struct _rpmsg_msg{
 	void *priv;
 };
 
-void init_rsc_tbl(void) {
-
-	
-
-	//adi_resource_table = &___MCAPI_common_start;
-	//resource_table = &___MCAPI_common_start.tbl;
-
-	/* Don't initialize if remoteproc driver has already */
-	/*if(strcmp((const char *)adi_resource_table->tag, (const char *)rsc_tbl_local.tag)){
-		*adi_resource_table = rsc_tbl_local;
-
-		adi_resource_table->tbl.rpmsg_vdev.notifyid = 1;
-		adi_resource_table->tbl.vring[0].notifyid = 1;
-		adi_resource_table->tbl.vring[1].notifyid = 1;
-
-	}*/
-}
-
 int rsc_tbl_ready(void) {
 	/* 0x1 acknowledge, 0x2 driver found, 0x4 driver ready*/
 	return resource_table->rpmsg_vdev.status == 7;
@@ -159,7 +141,6 @@ int rsc_tbl_ready(void) {
 int rpmsg_init_channel_to_ARM(void){
 	struct rpmsg_lite_instance *rpmsg_instance;
 
-	init_rsc_tbl();
 	while(!rsc_tbl_ready()){
 		/* Wait for resource table to be initialized by ARM*/
 	}
@@ -200,7 +181,7 @@ int main()
 	}
 	for (i=0;i<EP_CORE1_OFFSET;i++)  {
 		rpmsg_echo_cap_ep_to_ARM[i].rpmsg_instance = &rpmsg_ARM_channel;
-		rpmsg_echo_cap_ep_to_ARM[i].rpmsg_ept = &sharc_ARM_echo_endpoint_context[i].ept;
+		rpmsg_echo_cap_ep_to_ARM[i].rpmsg_ept = &sharc_ARM_echo_cap_endpoint_context[i].ept;
 	}
 
 	// Initialize rpmsg channel to the ARM core and create two endpoints
